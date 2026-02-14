@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جانرك - شريك حياة يناسب قيمك وحياتك</title>
+    <meta name="description" content="جانرك هو تطبيق المواعدة المصمم للباحثين عن شريك حياة يناسب قيمهم وثقافتهم.">
+    <meta name="theme-color" content="#6542AD">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="جانرك - شريك حياة يناسب قيمك وحياتك">
+    <meta property="og:description" content="تطبيق المواعدة المصمم للباحثين عن شريك حياة يناسب قيمهم وثقافتهم.">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="lang-ar">
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="nav-logo">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="32" height="32">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                    <path d="M232.58,144.81C264.57,161.01 286.49,194.2 286.49,232.5C286.49,270.81 264.57,303.99 232.58,320.19C200.6,303.99 178.67,270.81 178.67,232.5C178.67,194.2 200.6,161.01 232.58,144.81Z" fill="#ffffff"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features" data-i18n="nav_features">المميزات</a></li>
+                <li><a href="#how-it-works" data-i18n="nav_how">كيف يعمل</a></li>
+                <li><a href="#screenshots" data-i18n="nav_screenshots">صور التطبيق</a></li>
+                <li><a href="#faq" data-i18n="nav_faq">الأسئلة الشائعة</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.janerek" target="_blank" rel="noopener" class="nav-cta" data-i18n="nav_download">حمّل التطبيق</a></li>
+                <li>
+                    <button class="lang-toggle" id="langToggle">
+                        <span class="lang-option" data-lang="ar">ع</span>
+                        <span class="lang-divider">|</span>
+                        <span class="lang-option" data-lang="en">EN</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg"></div>
+        <div class="container hero-content">
+            <div class="hero-icon fade-in">
+                <svg viewBox="0 0 465 465" width="120" height="120">
+                    <defs>
+                        <linearGradient id="grad-left" x1="89" y1="232" x2="245" y2="232">
+                            <stop offset="0" stop-color="#8D13FF"/>
+                            <stop offset="1" stop-color="#FEBFD4"/>
+                        </linearGradient>
+                        <linearGradient id="grad-right" x1="378" y1="211" x2="278" y2="217">
+                            <stop offset="0" stop-color="#FF135B"/>
+                            <stop offset="1" stop-color="#DDB8FF"/>
+                        </linearGradient>
+                        <linearGradient id="grad-heart" x1="215" y1="231" x2="251" y2="231">
+                            <stop offset="0" stop-color="#CA26AF"/>
+                            <stop offset="1" stop-color="#310B7E"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="url(#grad-left)" fill-opacity="0.5"/>
+                    <path d="M181.51,124.9C241.72,124.9 290.44,173.12 290.44,232.5C290.44,291.88 241.72,340.1 181.51,340.1C121.31,340.1 72.59,291.88 72.59,232.5C72.59,173.12 121.31,124.9 181.51,124.9Z" fill="none" stroke="#452A7B" stroke-width="8"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="url(#grad-right)" fill-opacity="0.5"/>
+                    <path d="M282.49,124.9C342.69,124.9 391.41,173.12 391.42,232.5C391.42,291.88 342.69,340.1 282.49,340.1C222.28,340.1 173.56,291.88 173.56,232.5C173.56,173.12 222.28,124.9 282.49,124.9Z" fill="none" stroke="#9C468E" stroke-width="8"/>
+                    <path d="M232.58,144.81C264.57,161.01 286.49,194.2 286.49,232.5C286.49,270.81 264.57,303.99 232.58,320.19C200.6,303.99 178.67,270.81 178.67,232.5C178.67,194.2 200.6,161.01 232.58,144.81Z" fill="#ffffff"/>
+                    <path d="M232,258.93L228.13,255.41C214.4,242.96 205.33,234.75 205.33,224.67C205.33,216.45 211.79,210 220,210C224.64,210 229.09,212.16 232,215.57C234.91,212.16 239.36,210 244,210C252.21,210 258.67,216.45 258.67,224.67C258.67,234.75 249.6,242.96 235.87,255.44L232,258.93Z" fill="url(#grad-heart)"/>
+                </svg>
+            </div>
+            <h1 class="hero-title fade-in" data-i18n="hero_title">جانرك</h1>
+            <p class="hero-tagline fade-in" data-i18n="hero_tagline">شريك حياة يناسب قيمك وحياتك</p>
+            <p class="hero-subtitle fade-in" data-i18n="hero_subtitle">اكتشف شريك حياتك المناسب بناءً على القيم والثقافة والاهتمامات المشتركة. جانرك هو المكان المناسب للقاء الشخص المناسب.</p>
+            <a href="https://play.google.com/store/apps/details?id=com.janerek" target="_blank" rel="noopener" class="btn btn-primary hero-cta fade-in">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                <span data-i18n="hero_cta">حمّل من Google Play</span>
+            </a>
+            <a href="#features" class="scroll-indicator fade-in">
+                <span data-i18n="scroll_text">استكشف المزيد</span>
+                <div class="scroll-arrow"></div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="features_title">لماذا جانرك؟</h2>
+            <p class="section-subtitle fade-in" data-i18n="features_subtitle">تجربة مواعدة مصممة لمن يبحث عن علاقة جادة.</p>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature1_title">أنشئ ملفك الشخصي</h3>
+                    <p data-i18n="feature1_desc">أضف جنسيتك، ديانتك، مهنتك، مستواك التعليمي، ولغاتك. ملفك الشخصي يعكس هويتك الحقيقية.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature2_title">تصفية ذكية</h3>
+                    <p data-i18n="feature2_desc">فلاتر متقدمة حسب الجنسية، الديانة، اللغة، العمر، والموقع. اعثر على الشخص المناسب بسهولة.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature3_title">آمن وموثوق</h3>
+                    <p data-i18n="feature3_desc">توثيق الملفات الشخصية وإعدادات الخصوصية المتقدمة. بياناتك الشخصية في أمان تام.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature4_title">علاقات جادة</h3>
+                    <p data-i18n="feature4_desc">مصمم للباحثين عن شريك حياة. من المحادثات العميقة إلى اللقاءات الحقيقية — رحلتك تبدأ هنا.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature5_title">قريب منك</h3>
+                    <p data-i18n="feature5_desc">اكتشف أشخاصاً بالقرب منك أو ابحث حسب البلد. شريكك المناسب قد يكون أقرب مما تتوقع.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature6_title">تجربة مميزة</h3>
+                    <p data-i18n="feature6_desc">اكتشف من أعجب بك، احصل على أولوية في الظهور، وتمتع بتمريرات غير محدودة.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="how_title">كيف يعمل؟</h2>
+            <p class="section-subtitle fade-in" data-i18n="how_subtitle">ثلاث خطوات بسيطة للعثور على شريكك.</p>
+            <div class="steps">
+                <div class="step fade-in">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3 data-i18n="step1_title">أنشئ ملفك الشخصي</h3>
+                        <p data-i18n="step1_desc">شارك جنسيتك، ديانتك، مهنتك، واهتماماتك. كلما شاركت أكثر، كانت نتائجك أفضل.</p>
+                    </div>
+                </div>
+                <div class="step-connector fade-in"></div>
+                <div class="step fade-in">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3 data-i18n="step2_title">اكتشف وتطابق</h3>
+                        <p data-i18n="step2_desc">تصفح ملفات شخصية مُصفّاة حسب تفضيلاتك. أعجبك شخص؟ اسحب لليمين.</p>
+                    </div>
+                </div>
+                <div class="step-connector fade-in"></div>
+                <div class="step fade-in">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3 data-i18n="step3_title">تواصل</h3>
+                        <p data-i18n="step3_desc">عندما يكون الإعجاب متبادلاً، ابدأ المحادثة. خطط للقاء وتعرّف على شريكك المحتمل.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots" id="screenshots">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="screenshots_title">شاهد التطبيق</h2>
+            <p class="section-subtitle fade-in" data-i18n="screenshots_subtitle">نظرة على تجربة جانرك.</p>
+            <div class="screenshots-wrapper">
+                <button class="carousel-arrow carousel-arrow-left" aria-label="Scroll left">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="screenshots-carousel">
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/0.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/1.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/2.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/3.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/4.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/5.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/6.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/7.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/8.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                    <div class="screenshot-item fade-in">
+                        <img src="assets/screenshots/9.jpg" alt="App screenshot" loading="lazy">
+                    </div>
+                </div>
+                <button class="carousel-arrow carousel-arrow-right" aria-label="Scroll right">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="testimonials_title">ماذا يقول المستخدمون</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-text" data-i18n="testimonial1_text">"أخيراً تطبيق يفهم احتياجاتي. الفلاتر ممتازة وساعدتني ألاقي أشخاص يشاركوني نفس القيم والثقافة."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">ن</div>
+                        <div>
+                            <div class="testimonial-name" data-i18n="testimonial1_name">نور م.</div>
+                            <div class="testimonial-meta" data-i18n="testimonial1_meta">عضو منذ 2026</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-text" data-i18n="testimonial2_text">"التطبيق سهل الاستخدام ويركز على العلاقات الجادة. وجدت شريكة حياتي من خلاله وأنا ممتن جداً."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">ع</div>
+                        <div>
+                            <div class="testimonial-name" data-i18n="testimonial2_name">عمر ك.</div>
+                            <div class="testimonial-meta" data-i18n="testimonial2_meta">عضو منذ 2026</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="testimonial-stars">
+                        <span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span><span>&#9733;</span>
+                    </div>
+                    <p class="testimonial-text" data-i18n="testimonial3_text">"أحب إمكانية البحث حسب الجنسية والديانة. هذا يوفر الكثير من الوقت ويساعد في إيجاد شخص متوافق فعلاً."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">ل</div>
+                        <div>
+                            <div class="testimonial-name" data-i18n="testimonial3_name">لينا ر.</div>
+                            <div class="testimonial-meta" data-i18n="testimonial3_meta">عضو منذ 2026</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="faq_title">الأسئلة الشائعة</h2>
+            <div class="faq-list">
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq1_q">ما هو جانرك؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq1_a">جانرك هو تطبيق مواعدة مصمم للأشخاص الباحثين عن شريك حياة. يتيح لك التعبير عن هويتك وثقافتك والتواصل مع أشخاص يشاركونك نفس القيم.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq2_q">هل جانرك مجاني؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq2_a">نعم! جانرك مجاني للتحميل والاستخدام. يمكنك إنشاء ملفك الشخصي، التصفح، الإعجاب، والمحادثة مجاناً. نقدم أيضاً اشتراكاً مميزاً يفتح مزايا إضافية.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq3_q">كيف يعمل التطابق؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq3_a">تصفح الملفات الشخصية المُصفّاة حسب تفضيلاتك. اسحب لليمين إذا أعجبك شخص. إذا أعجبت به أنت أيضاً، يحدث تطابق ويمكنكما بدء المحادثة!</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq4_q">هل معلوماتي آمنة؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq4_a">بالتأكيد. خصوصيتك أولويتنا القصوى. ملفك الشخصي مرئي فقط لأعضاء جانرك الآخرين. لا نشارك بياناتك مع أطراف ثالثة أبداً، ولديك تحكم كامل فيما تشاركه.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq5_q">ما الذي يميز جانرك عن التطبيقات الأخرى؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq5_a">جانرك مصمم خصيصاً للباحثين عن علاقة جادة. نقدم فلاتر حسب الجنسية، الديانة، اللغة، المهنة، والمستوى التعليمي — مما يساعدك في إيجاد شخص متوافق حقاً.</p>
+                    </div>
+                </div>
+                <div class="faq-item fade-in">
+                    <button class="faq-question">
+                        <span data-i18n="faq6_q">كيف أحذف حسابي؟</span>
+                        <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p data-i18n="faq6_a">يمكنك حذف حسابك في أي وقت من صفحة الإعدادات داخل التطبيق. اذهب إلى الإعدادات > الحساب > حذف الحساب. سيتم حذف جميع بياناتك نهائياً من خوادمنا.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download CTA Section -->
+    <section class="download-cta" id="download">
+        <div class="container">
+            <h2 class="section-title fade-in" data-i18n="download_title">مستعد للبدء؟</h2>
+            <p class="section-subtitle fade-in" data-i18n="download_subtitle">انضم إلى آلاف الأشخاص الذين وجدوا شريكهم عبر جانرك.</p>
+            <a href="https://play.google.com/store/apps/details?id=com.janerek" target="_blank" rel="noopener" class="btn btn-primary btn-large fade-in">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                <span data-i18n="download_btn">حمّل جانرك</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <svg viewBox="0 0 465 465" width="40" height="40">
+                        <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                        <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.5"/>
+                        <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.5"/>
+                        <path d="M232.58,144.81C264.57,161.01 286.49,194.2 286.49,232.5C286.49,270.81 264.57,303.99 232.58,320.19C200.6,303.99 178.67,270.81 178.67,232.5C178.67,194.2 200.6,161.01 232.58,144.81Z" fill="#ffffff"/>
+                    </svg>
+                    <span class="footer-name" data-i18n="app_name">جانرك</span>
+                    <p class="footer-tagline" data-i18n="hero_tagline">شريك حياة يناسب قيمك وحياتك</p>
+                </div>
+                <div class="footer-links">
+                    <h4 data-i18n="footer_company">الشركة</h4>
+                    <ul>
+                        <li><a href="privacy.html" data-i18n="footer_privacy">سياسة الخصوصية</a></li>
+                        <li><a href="terms.html" data-i18n="footer_terms">شروط الاستخدام</a></li>
+                        <li><a href="contact.html" data-i18n="footer_contact">تواصل معنا</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n="footer_copy">&copy; 2026 جانرك. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تواصل معنا - جانرك</title>
+    <meta name="description" content="تواصل مع فريق جانرك. نحب أن نسمع منك.">
+    <meta name="theme-color" content="#6542AD">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="lang-ar">
+
+    <!-- Navigation -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="nav-logo">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="32" height="32">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                    <path d="M232.58,144.81C264.57,161.01 286.49,194.2 286.49,232.5C286.49,270.81 264.57,303.99 232.58,320.19C200.6,303.99 178.67,270.81 178.67,232.5C178.67,194.2 200.6,161.01 232.58,144.81Z" fill="#ffffff"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 data-i18n="contact_page_title">تواصل معنا</h1>
+        </div>
+
+        <div class="page-content">
+            <a href="index.html" class="page-back" data-i18n="back_home">&rarr; العودة للرئيسية</a>
+
+            <p data-i18n="contact_intro">هل لديك سؤال أو ملاحظة أو تحتاج مساعدة؟ نحب أن نسمع منك. املأ النموذج أدناه وسنرد عليك في أقرب وقت ممكن.</p>
+
+            <form class="contact-form" id="contactForm">
+                <input type="hidden" name="_subject" value="Janerek Contact Form">
+                <input type="hidden" name="_captcha" value="false">
+
+                <div class="form-group">
+                    <label for="name" data-i18n="contact_name">الاسم</label>
+                    <input type="text" id="name" name="name" data-i18n-placeholder="contact_name_ph" placeholder="اسمك" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" data-i18n="contact_email">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject" data-i18n="contact_subject">الموضوع</label>
+                    <input type="text" id="subject" name="subject" data-i18n-placeholder="contact_subject_ph" placeholder="ما هو الموضوع؟" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message" data-i18n="contact_message">الرسالة</label>
+                    <textarea id="message" name="message" data-i18n-placeholder="contact_message_ph" placeholder="أخبرنا المزيد..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" data-i18n="contact_send">إرسال الرسالة</button>
+            </form>
+
+            <h2 data-i18n="contact_other_title">طرق أخرى للتواصل</h2>
+
+            <p data-i18n="contact_other_text">للمسائل العاجلة أو مشاكل الحساب، يمكنك التواصل معنا مباشرة على:</p>
+            <p><a href="mailto:info@janerek.com">info@janerek.com</a></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p data-i18n="footer_copy">&copy; 2026 جانرك. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/subpage.js"></script>
+    <script>
+        var form = document.getElementById('contactForm');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.textContent = '...';
+                var data = new FormData(form);
+                fetch('https://formsubmit.co/ajax/janerek.dating@gmail.com', {
+                    method: 'POST',
+                    body: data,
+                    headers: { 'Accept': 'application/json' }
+                }).then(function (res) {
+                    var lang = localStorage.getItem('janerek-lang') || 'ar';
+                    if (res.ok) {
+                        if (lang === 'ar') {
+                            form.innerHTML = '<div style="text-align:center;padding:40px 0"><h2 style="margin-bottom:12px">تم إرسال الرسالة!</h2><p style="color:var(--color-text-secondary)">شكراً لتواصلك معنا. سنرد عليك قريباً.</p></div>';
+                        } else {
+                            form.innerHTML = '<div style="text-align:center;padding:40px 0"><h2 style="margin-bottom:12px">Message Sent!</h2><p style="color:var(--color-text-secondary)">Thank you for reaching out. We\'ll get back to you soon.</p></div>';
+                        }
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = lang === 'ar' ? 'إرسال الرسالة' : 'Send Message';
+                        alert(lang === 'ar' ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Please try again.');
+                    }
+                }).catch(function () {
+                    var lang = localStorage.getItem('janerek-lang') || 'ar';
+                    btn.disabled = false;
+                    btn.textContent = lang === 'ar' ? 'إرسال الرسالة' : 'Send Message';
+                    alert(lang === 'ar' ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Please try again.');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
