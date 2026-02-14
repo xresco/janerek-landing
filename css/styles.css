@@ -481,10 +481,12 @@ img {
 
 .screenshots-wrapper {
     position: relative;
+    direction: ltr;
 }
 
 .screenshots-carousel {
     display: flex;
+    direction: ltr;
     gap: 12px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;

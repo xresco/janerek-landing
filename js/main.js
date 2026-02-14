@@ -304,23 +304,25 @@
     // ——— Screenshots carousel: arrows + drag + scroll hint ———
     var carousel = document.querySelector('.screenshots-carousel');
     if (carousel) {
+        // Always reset scroll to start (left side) since carousel is forced LTR
+        carousel.scrollLeft = 0;
+        window.addEventListener('langChanged', function () {
+            carousel.scrollLeft = 0;
+        });
+
         var leftBtn = document.querySelector('.carousel-arrow-left');
         var rightBtn = document.querySelector('.carousel-arrow-right');
         var scrollStep = 300;
 
-        function isRTL() {
-            return document.documentElement.getAttribute('dir') === 'rtl';
-        }
-
-        // Arrow clicks
+        // Arrow clicks (carousel is always LTR)
         if (leftBtn) {
             leftBtn.addEventListener('click', function () {
-                carousel.scrollBy({ left: isRTL() ? scrollStep : -scrollStep, behavior: 'smooth' });
+                carousel.scrollBy({ left: -scrollStep, behavior: 'smooth' });
             });
         }
         if (rightBtn) {
             rightBtn.addEventListener('click', function () {
-                carousel.scrollBy({ left: isRTL() ? -scrollStep : scrollStep, behavior: 'smooth' });
+                carousel.scrollBy({ left: scrollStep, behavior: 'smooth' });
             });
         }
 
@@ -329,13 +331,8 @@
             if (!leftBtn || !rightBtn) return;
             var sl = carousel.scrollLeft;
             var max = carousel.scrollWidth - carousel.clientWidth;
-            if (isRTL()) {
-                rightBtn.classList.toggle('hidden', Math.abs(sl) <= 10);
-                leftBtn.classList.toggle('hidden', Math.abs(sl) >= max - 10);
-            } else {
-                leftBtn.classList.toggle('hidden', sl <= 10);
-                rightBtn.classList.toggle('hidden', sl >= max - 10);
-            }
+            leftBtn.classList.toggle('hidden', sl <= 10);
+            rightBtn.classList.toggle('hidden', sl >= max - 10);
         }
         carousel.addEventListener('scroll', updateArrows);
         setTimeout(updateArrows, 100);
@@ -371,11 +368,10 @@
                 if (entries[0].isIntersecting && !hintDone) {
                     hintDone = true;
                     hintObserver.disconnect();
-                    var dir = isRTL() ? -1 : 1;
                     setTimeout(function () {
-                        carousel.scrollBy({ left: dir * 250, behavior: 'smooth' });
+                        carousel.scrollBy({ left: 250, behavior: 'smooth' });
                         setTimeout(function () {
-                            carousel.scrollBy({ left: dir * -250, behavior: 'smooth' });
+                            carousel.scrollBy({ left: -250, behavior: 'smooth' });
                         }, 500);
                     }, 300);
                 }
