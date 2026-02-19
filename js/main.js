@@ -13,24 +13,24 @@
             nav_faq: 'الأسئلة الشائعة',
             nav_download: 'حمّل التطبيق',
             hero_title: 'جانرك',
-            hero_tagline: 'شريك حياة يناسب قيمك وحياتك',
-            hero_subtitle: 'اكتشف شريك حياتك المناسب بناءً على القيم والثقافة والاهتمامات المشتركة. جانرك هو المكان المناسب للقاء الشخص المناسب.',
+            hero_tagline: 'ابدأ قصة زواجك من هنا',
+            hero_subtitle: 'تطبيق تعارف للزواج — ابحث عن شريك يناسب قيمك وثقافتك. جانِرك مصمم للأشخاص الذين يعرفون ما يريدون: شريك حياة حقيقي.',
             hero_cta: 'حمّل من Google Play',
             scroll_text: 'استكشف المزيد',
-            features_title: 'لماذا جانرك؟',
-            features_subtitle: 'تجربة مواعدة مصممة لمن يبحث عن علاقة جادة.',
-            feature1_title: 'أنشئ ملفك الشخصي',
-            feature1_desc: 'أضف جنسيتك، ديانتك، مهنتك، مستواك التعليمي، ولغاتك. ملفك الشخصي يعكس هويتك الحقيقية.',
-            feature2_title: 'تصفية ذكية',
-            feature2_desc: 'فلاتر متقدمة حسب الجنسية، الديانة، اللغة، العمر، والموقع. اعثر على الشخص المناسب بسهولة.',
-            feature3_title: 'آمن وموثوق',
-            feature3_desc: 'توثيق الملفات الشخصية وإعدادات الخصوصية المتقدمة. بياناتك الشخصية في أمان تام.',
-            feature4_title: 'علاقات جادة',
-            feature4_desc: 'مصمم للباحثين عن شريك حياة. من المحادثات العميقة إلى اللقاءات الحقيقية — رحلتك تبدأ هنا.',
-            feature5_title: 'قريب منك',
-            feature5_desc: 'اكتشف أشخاصاً بالقرب منك أو ابحث حسب البلد. شريكك المناسب قد يكون أقرب مما تتوقع.',
-            feature6_title: 'تجربة مميزة',
-            feature6_desc: 'اكتشف من أعجب بك، احصل على أولوية في الظهور، وتمتع بتمريرات غير محدودة.',
+            features_title: 'ما الذي يميز جانِرك؟',
+            features_subtitle: 'تطبيق مصمم للباحثين عن شريك حياة — وليس مجرد تمرير عشوائي.',
+            feature1_title: 'نية واضحة للزواج',
+            feature1_desc: 'كل شخص هنا هدفه واحد: بناء أسرة. بدون ألعاب، بدون إضاعة وقت — جدية من البداية.',
+            feature2_title: 'توافق ثقافي حقيقي',
+            feature2_desc: 'إمكانية البحث حسب الجنسية، الدين، اللغة، والموقع. لأن شريك الحياة يجب أن يفهم عالمك — عاداتك، قيمك، وطموحاتك.',
+            feature3_title: 'حسابات موثّقة وآمنة',
+            feature3_desc: 'أشخاص حقيقيون. ملفات موثّقة. بيئة آمنة يمكنك الوثوق بها.',
+            feature4_title: 'احترام من أول تواصل',
+            feature4_desc: 'مصمم لمجتمعات تقدّر العائلة والالتزام. كل تفاعل يبدأ باحترام ووضوح.',
+            feature5_title: 'فلاتر ذكية ودقيقة',
+            feature5_desc: 'وقتك ثمين. فلاترنا تساعدك في العثور على الشخص المناسب بسرعة — دون إضاعة الوقت مع من لا يناسبك.',
+            feature6_title: 'تجربة عصرية بقيم أصيلة',
+            feature6_desc: 'تصميم حديث يناسب جيل اليوم، دون التنازل عن القيم والتقاليد.',
             how_title: 'كيف يعمل؟',
             how_subtitle: 'ثلاث خطوات بسيطة للعثور على شريكك.',
             step1_title: 'أنشئ ملفك الشخصي',
@@ -64,8 +64,8 @@
             faq5_a: 'جانرك مصمم خصيصاً للباحثين عن علاقة جادة. نقدم فلاتر حسب الجنسية، الديانة، اللغة، المهنة، والمستوى التعليمي — مما يساعدك في إيجاد شخص متوافق حقاً.',
             faq6_q: 'كيف أحذف حسابي؟',
             faq6_a: 'يمكنك حذف حسابك في أي وقت من صفحة الإعدادات داخل التطبيق. اذهب إلى الإعدادات > الحساب > حذف الحساب. سيتم حذف جميع بياناتك نهائياً من خوادمنا.',
-            download_title: 'مستعد للبدء؟',
-            download_subtitle: 'انضم إلى آلاف الأشخاص الذين وجدوا شريكهم عبر جانرك.',
+            download_title: 'شريك حياتك قد يكون هنا',
+            download_subtitle: 'حمّل جانِرك وابدأ رحلتك بجدية.',
             download_btn: 'حمّل جانرك',
             footer_company: 'الشركة',
             footer_privacy: 'سياسة الخصوصية',
@@ -81,24 +81,24 @@
             nav_faq: 'FAQ',
             nav_download: 'Download',
             hero_title: 'Janerek',
-            hero_tagline: 'The right place to meet the right match',
-            hero_subtitle: 'Discover your perfect match based on shared values, culture, and interests. Janerek is the right place to meet the right person.',
+            hero_tagline: 'Dating for Marriage',
+            hero_subtitle: 'Marriage-first dating. Find your future spouse based on values and culture. This isn\'t endless swiping. This is intentional connection.',
             hero_cta: 'Get it on Google Play',
             scroll_text: 'Scroll to explore',
             features_title: 'Why Janerek?',
-            features_subtitle: 'A dating experience designed for those seeking a serious relationship.',
-            feature1_title: 'Build Your Profile',
-            feature1_desc: 'Add your nationality, religion, profession, education, and languages. Your profile reflects your true identity.',
-            feature2_title: 'Smart Filters',
-            feature2_desc: 'Advanced filters by nationality, religion, language, age, and location. Find the right person with ease.',
-            feature3_title: 'Safe & Verified',
-            feature3_desc: 'Profile verification and advanced privacy settings. Your personal data is completely secure.',
-            feature4_title: 'Serious Connections',
-            feature4_desc: 'Designed for those seeking a life partner. From deep conversations to real meetings — your journey starts here.',
-            feature5_title: 'Location-Based',
-            feature5_desc: 'Discover people near you or search by country. Your perfect match might be closer than you think.',
-            feature6_title: 'Premium Experience',
-            feature6_desc: 'See who likes you, get priority visibility, and enjoy unlimited swipes.',
+            features_subtitle: 'A dating app built for marriage, not just swiping.',
+            feature1_title: 'Designed for Marriage',
+            feature1_desc: 'Everyone on Janerek is here for the same reason: to find a life partner. No hookups. No games. Only serious individuals ready to build a future.',
+            feature2_title: 'Culture & Compatibility First',
+            feature2_desc: 'Filter by nationality, religion, language, and location to meet someone who truly understands your world — your traditions, your values, your vision.',
+            feature3_title: 'Verified & Secure',
+            feature3_desc: 'Real people. Verified profiles. A safe environment where serious intentions come first.',
+            feature4_title: 'Family-Oriented & Respectful',
+            feature4_desc: 'Designed for communities where family, respect, and long-term commitment matter. Every interaction starts with dignity and clarity.',
+            feature5_title: 'Smart, Meaningful Matching',
+            feature5_desc: 'Powerful filters help you focus on what truly matters — so you spend less time searching and more time connecting.',
+            feature6_title: 'Modern Experience, Traditional Values',
+            feature6_desc: 'A clean, youthful app experience built for today\'s generation — without compromising on cultural roots and principles.',
             how_title: 'How It Works',
             how_subtitle: 'Three simple steps to finding your match.',
             step1_title: 'Create Your Profile',
@@ -132,8 +132,8 @@
             faq5_a: 'Janerek is designed specifically for those seeking a serious relationship. We offer filters by nationality, religion, language, profession, and education level — helping you find someone truly compatible.',
             faq6_q: 'How do I delete my account?',
             faq6_a: 'You can delete your account at any time from the Settings page within the app. Go to Settings > Account > Delete Account. All your data will be permanently removed from our servers.',
-            download_title: 'Ready to Start?',
-            download_subtitle: 'Join thousands of people who found their match through Janerek.',
+            download_title: 'Your future spouse might already be here.',
+            download_subtitle: 'Download Janerek today and start your journey with purpose.',
             download_btn: 'Download Janerek',
             footer_company: 'Company',
             footer_privacy: 'Privacy Policy',
@@ -190,6 +190,11 @@
             document.title = 'Janerek - The Right Place to Meet the Right Match';
         }
 
+        // Swap screenshot images to match selected language
+        document.querySelectorAll('[data-screenshot]').forEach(function(img) {
+            img.src = 'assets/screenshots/' + lang + '/' + img.dataset.screenshot;
+        });
+
         // Notify parallax scroll about direction change
         window.dispatchEvent(new Event('langChanged'));
     }
@@ -230,6 +235,14 @@
             navLinks.classList.remove('open');
             navToggle.classList.remove('active');
         });
+    });
+
+    // Close mobile menu when tapping outside
+    document.addEventListener('click', function (e) {
+        if (navLinks.classList.contains('open') && !navLinks.contains(e.target) && !navToggle.contains(e.target)) {
+            navLinks.classList.remove('open');
+            navToggle.classList.remove('active');
+        }
     });
 
     // ——— Navbar scroll background ———
