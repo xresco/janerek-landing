@@ -242,6 +242,17 @@ button { font: inherit; }
   width: auto;
   font-size: 14px;
 }
+/* Zodiac drawables are non-square (some 373x302, some 224x356) — give them
+   a slightly larger slot so portrait/landscape signs render at comparable
+   visual weight to the other Material chip icons. */
+.chip .icon--zodiac {
+  width: 16px;
+  height: 16px;
+}
+.chip .icon--zodiac svg {
+  width: 16px;
+  height: 16px;
+}
 
 /* =================== Section =================== */
 .section {

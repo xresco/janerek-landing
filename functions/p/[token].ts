@@ -5,6 +5,8 @@
 // chips (looking-for, profession, education, zodiac) → dark-wine tag chips
 // (religion, nationality with flag+demonym, "Speaks <language>") → Story.
 
+import { zodiacSvg } from "./_zodiac";
+
 interface Env {
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
@@ -216,28 +218,43 @@ function zodiacLabel(z: string | null): string | null {
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
 
-// Common ISO-639 language codes the Janerek client emits → English label.
+// Janerek Language enum values (uppercase, e.g. "ARABIC") and ISO-639
+// codes both supported. Mirrors com.aboutyou.productinfra.data.user.Language.
 const LANGUAGE_NAMES: Record<string, string> = {
-  ar: "Arabic", en: "English", fr: "French", de: "German",
-  es: "Spanish", it: "Italian", pt: "Portuguese", ru: "Russian",
-  tr: "Turkish", fa: "Persian", ur: "Urdu", hi: "Hindi",
-  bn: "Bengali", id: "Indonesian", ms: "Malay", nl: "Dutch",
-  pl: "Polish", ro: "Romanian", sv: "Swedish", no: "Norwegian",
-  da: "Danish", fi: "Finnish", el: "Greek", he: "Hebrew",
-  ja: "Japanese", ko: "Korean", zh: "Chinese", th: "Thai",
-  vi: "Vietnamese", uk: "Ukrainian", cs: "Czech", hu: "Hungarian",
-  bg: "Bulgarian", sr: "Serbian", hr: "Croatian", sk: "Slovak",
-  sl: "Slovenian", lt: "Lithuanian", lv: "Latvian", et: "Estonian",
-  ku: "Kurdish", az: "Azerbaijani", hy: "Armenian", ka: "Georgian",
-  am: "Amharic", sw: "Swahili", so: "Somali", ps: "Pashto",
+  ARABIC: "Arabic", ENGLISH: "English", FRENCH: "French", SPANISH: "Spanish",
+  RUSSIAN: "Russian", KURDISH: "Kurdish", ARMENIAN: "Armenian",
+  SYRIAC: "Syriac", TURKISH: "Turkish", MALAY: "Malay", HEBREW: "Hebrew",
+  PERSIAN: "Persian", BERBER: "Berber", URDU: "Urdu", PORTUGUESE: "Portuguese",
+  GERMAN: "German", ITALIAN: "Italian", DUTCH: "Dutch", POLISH: "Polish",
+  ROMANIAN: "Romanian", GREEK: "Greek", CZECH: "Czech", SWEDISH: "Swedish",
+  HUNGARIAN: "Hungarian", DANISH: "Danish", FINNISH: "Finnish",
+  BULGARIAN: "Bulgarian", CROATIAN: "Croatian", SLOVAK: "Slovak",
+  LITHUANIAN: "Lithuanian", LATVIAN: "Latvian", SLOVENE: "Slovene",
+  ESTONIAN: "Estonian", OTHER: "Other",
+  // ISO-639 fallback for any clients that send codes instead of enum values.
+  ar: "Arabic", en: "English", fr: "French", de: "German", es: "Spanish",
+  it: "Italian", pt: "Portuguese", ru: "Russian", tr: "Turkish", fa: "Persian",
+  ur: "Urdu", hi: "Hindi", bn: "Bengali", id: "Indonesian", ms: "Malay",
+  nl: "Dutch", pl: "Polish", ro: "Romanian", sv: "Swedish", no: "Norwegian",
+  da: "Danish", fi: "Finnish", el: "Greek", he: "Hebrew", ja: "Japanese",
+  ko: "Korean", zh: "Chinese", th: "Thai", vi: "Vietnamese", uk: "Ukrainian",
+  cs: "Czech", hu: "Hungarian", bg: "Bulgarian", sr: "Serbian", hr: "Croatian",
+  sk: "Slovak", sl: "Slovenian", lt: "Lithuanian", lv: "Latvian",
+  et: "Estonian", ku: "Kurdish", az: "Azerbaijani", hy: "Armenian",
+  ka: "Georgian", am: "Amharic", sw: "Swahili", so: "Somali", ps: "Pashto",
   tl: "Tagalog", uz: "Uzbek", kk: "Kazakh",
 };
 
 function languageLabel(lang: string): string {
   if (!lang) return "";
-  const code = lang.trim().toLowerCase();
-  if (code.length <= 3 && LANGUAGE_NAMES[code]) return LANGUAGE_NAMES[code];
-  return lang;
+  const trimmed = lang.trim();
+  // Try exact match (handles ISO codes like "ar"), then uppercase enum form.
+  if (LANGUAGE_NAMES[trimmed]) return LANGUAGE_NAMES[trimmed];
+  const upper = trimmed.toUpperCase();
+  if (LANGUAGE_NAMES[upper]) return LANGUAGE_NAMES[upper];
+  // Fall back to title-case so we don't render raw "ARABIC" if a value
+  // shows up that isn't in the table.
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
 }
 
 const VERIFIED_SVG = `<svg class="verified-badge" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Verified"><path d="M12 1l2.39 2.06 3.13-.4.91 3.04 2.96 1.31-.94 3 1 3-3 1.3-.91 3.04-3.13-.4L12 19.7l-2.4-2.06-3.13.4-.91-3.04-3-1.3 1-3-1-3 3-1.3.91-3.04 3.13.4L12 1z" fill="#1C64F2"/><path d="M8.4 12.2l2.5 2.5 4.9-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -252,7 +269,6 @@ const STORY_SVG = `<svg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" a
 const ICON_LOOKING_FOR = `<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M784,840 L532,588q-30,24 -69,38t-83,14q-109,0 -184.5,-75.5T120,380q0,-109 75.5,-184.5T380,120q109,0 184.5,75.5T640,380q0,44 -14,83t-38,69l252,252 -56,56ZM380,560q75,0 127.5,-52.5T560,380q0,-75 -52.5,-127.5T380,200q-75,0 -127.5,52.5T200,380q0,75 52.5,127.5T380,560Z" fill="currentColor"/></svg>`;
 const ICON_WORK = `<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M160,840q-33,0 -56.5,-23.5T80,760v-440q0,-33 23.5,-56.5T160,240h160v-80q0,-33 23.5,-56.5T400,80h160q33,0 56.5,23.5T640,160v80h160q33,0 56.5,23.5T880,320v440q0,33 -23.5,56.5T800,840L160,840ZM160,760h640v-440L160,320v440ZM400,240h160v-80L400,160v80ZM160,760v-440,440Z" fill="currentColor"/></svg>`;
 const ICON_SCHOOL = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5,13.18v4L12,21l7,-3.82v-4L12,17l-7,-3.82zM12,3L1,9l11,6 9,-4.91V17h2V9L12,3z" fill="currentColor"/></svg>`;
-const ICON_ZODIAC = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l1.6 4.95H18.8l-4.2 3.05 1.6 4.95L12 11.9l-4.2 3.05 1.6-4.95L5.2 6.95h5.2L12 2z" fill="currentColor"/></svg>`;
 
 const ARROW_LEFT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
 const ARROW_RIGHT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
@@ -380,7 +396,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
   const zodiac = zodiacLabel(p.zodiac_sign);
   if (zodiac) {
-    highlights.push(`<span class="chip chip--light"><span class="icon">${ICON_ZODIAC}</span>${escapeHtml(zodiac)}</span>`);
+    const zSvg = zodiacSvg(p.zodiac_sign ?? "");
+    const zIcon = zSvg ? `<span class="icon icon--zodiac">${zSvg}</span>` : "";
+    highlights.push(`<span class="chip chip--light">${zIcon}${escapeHtml(zodiac)}</span>`);
   }
 
   // ---- Tags (dark wine chips) — religion, nationality flag+demonym,
