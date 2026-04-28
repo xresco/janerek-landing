@@ -1,13 +1,13 @@
 // Cloudflare Pages Function — image proxy for shared profile photos.
-// Serves /p/<token>/img/<i>.jpg by:
-//   1. Resolving the token to user_id + profile_photos[] via the RPC.
+// Serves /user/<uuid>/img/<i>.jpg by:
+//   1. Resolving the user id to profile_photos[] via the public RPC.
 //   2. Fetching photos[i] from the public Supabase Storage bucket
 //      `profile_photos` at path `{user_id}/{photo_id}`.
 //   3. Streaming the bytes back with a long edge-cache TTL.
 //
-// Why proxy a public bucket: revoking the share should also break any
-// leaked OG-image URL. The proxy returns 404 once the share is disabled
-// (CDN cache TTL is the only leak — capped at a week).
+// Why proxy a public bucket: when a user toggles is_publicly_shareable
+// off, the RPC returns no rows and this function returns 404 — the
+// edge cache is the only leak window (capped at a week).
 //
 // Env vars:
 //   SUPABASE_URL          — e.g. https://orpkbbiieovtbigdshon.supabase.co
@@ -20,12 +20,15 @@ interface Env {
   PROFILE_PHOTOS_BUCKET?: string;
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
-  const token = String(params.token ?? "");
+  const userId = String(params.id ?? "").toLowerCase();
   const idxRaw = String(params.index ?? "");
   const idx = parseInt(idxRaw.replace(/\.\w+$/, ""), 10);
 
-  if (!/^[A-Za-z0-9]{8,32}$/.test(token) || Number.isNaN(idx) || idx < 0) {
+  if (!UUID_RE.test(userId) || Number.isNaN(idx) || idx < 0) {
     return new Response("Not Found", { status: 404 });
   }
 
@@ -39,7 +42,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
         "apikey": env.SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${env.SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ p_token: token }),
+      body: JSON.stringify({ p_user_id: userId }),
     },
   );
 

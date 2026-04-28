@@ -1,5 +1,5 @@
 // Cloudflare Pages Function — renders the public profile page at
-// https://janerek.com/p/<token>. Visual structure mirrors the in-app
+// https://janerek.com/user/<uuid>. Visual structure mirrors the in-app
 // UserProfileFragment: photo pager (Instagram-story progress pills) →
 // name + flag + verified badge → "X years old" → light-pink highlight
 // chips (looking-for, profession, education, zodiac) → dark-wine tag chips
@@ -36,6 +36,9 @@ interface PublicProfile {
   is_verified: boolean;
   profile_photos: unknown;
 }
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function escapeHtml(s: string): string {
   return s
@@ -297,11 +300,11 @@ function notFound(host: string, appName: string): Response {
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { params, env } = context;
-  const token = String(params.token ?? "");
+  const userId = String(params.id ?? "").toLowerCase();
   const host = env.APP_HOST ?? "janerek.com";
   const appName = env.APP_NAME ?? "Janerek";
 
-  if (!/^[A-Za-z0-9]{8,32}$/.test(token)) {
+  if (!UUID_RE.test(userId)) {
     return notFound(host, appName);
   }
 
@@ -315,7 +318,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         "apikey": env.SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${env.SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({ p_token: token }),
+      body: JSON.stringify({ p_user_id: userId }),
     },
   );
 
@@ -326,22 +329,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
   const p = rows[0];
 
-  context.waitUntil(
-    fetch(`${env.SUPABASE_URL}/rest/v1/rpc/increment_share_view`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": env.SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${env.SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({ p_token: token }),
-    }).catch(() => undefined),
-  );
-
   const photoIds = extractPhotoIds(p.profile_photos);
   const photoCount = photoIds.length;
   const ogImageUrl = photoCount > 0
-    ? `https://${host}/p/${token}/img/0.jpg`
+    ? `https://${host}/user/${userId}/img/0.jpg`
     : `https://${host}/assets/og-default.jpg`;
 
   const bio = (p.bio ?? "").trim();
@@ -353,13 +344,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     `https://play.google.com/store/apps/details?id=com.janerek`;
   const appStoreUrl = env.APP_STORE_URL ??
     `https://apps.apple.com/app/janerek`;
-  const shareUrl = `https://${host}/p/${token}`;
+  const shareUrl = `https://${host}/user/${userId}`;
 
   // ---- Photo pager ----
   const slides = photoCount > 0
     ? photoIds
         .map((_, i) =>
-          `<div class="pager__slide"><img src="/p/${token}/img/${i}.jpg" alt="${escapeHtml(p.name)}" loading="${i === 0 ? "eager" : "lazy"}"></div>`
+          `<div class="pager__slide"><img src="/user/${userId}/img/${i}.jpg" alt="${escapeHtml(p.name)}" loading="${i === 0 ? "eager" : "lazy"}"></div>`
         )
         .join("")
     : `<div class="pager__slide"></div>`;
@@ -489,7 +480,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   <a class="cta" id="open-app"
      href="${playStoreUrl}"
      data-host="${host}"
-     data-token="${token}"
+     data-id="${userId}"
      data-android-pkg="com.janerek"
      data-android-store="${playStoreUrl}"
      data-ios-store="${appStoreUrl}"
@@ -558,7 +549,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       if (isAndroid) {
         e.preventDefault();
         var fallback = encodeURIComponent(btn.dataset.androidStore);
-        window.location.href = 'intent://' + btn.dataset.host + '/p/' + btn.dataset.token +
+        window.location.href = 'intent://' + btn.dataset.host + '/user/' + btn.dataset.id +
           '#Intent;scheme=https;package=' + btn.dataset.androidPkg +
           ';S.browser_fallback_url=' + fallback + ';end';
       } else if (isIOS) {
