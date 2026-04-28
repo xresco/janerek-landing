@@ -83,25 +83,29 @@ button { font: inherit; }
   object-fit: cover;
 }
 
-/* Top progress pills — Instagram-story style. One pill per photo. */
+/* Top progress pills — Instagram-story style. One pill per photo.
+   Sits inside the photo near the top edge, with a soft shadow so it's
+   readable against any photo. Mirrors the in-app ImageSliderView. */
 .pager__bars {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 12px;
+  left: 16px;
+  right: 16px;
   display: flex;
-  gap: 4px;
+  gap: 6px;
   z-index: 3;
+  pointer-events: none;
 }
 .pager__bar {
   flex: 1 1 0;
   height: 3px;
-  background: rgba(255, 255, 255, 0.30);
+  background: rgba(255, 255, 255, 0.45);
   border-radius: 2px;
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 .pager__bar.is-active {
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
 }
 
 /* Left/right click zones for keyboard-free navigation. */
@@ -142,34 +146,9 @@ button { font: inherit; }
 .pager__arrow--next { right: 10px; }
 .pager__arrow.is-disabled { opacity: 0 !important; }
 
-/* Bottom dot pagination — small dots beneath photo. */
-.pager__dots {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 12px;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  z-index: 3;
-  pointer-events: none;
-}
-.pager__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.40);
-}
-.pager__dot.is-active {
-  background: #fff;
-  width: 18px;
-  border-radius: 3px;
-}
-
 .pager--single .pager__bars,
 .pager--single .pager__zone,
-.pager--single .pager__arrow,
-.pager--single .pager__dots {
+.pager--single .pager__arrow {
   display: none;
 }
 
@@ -243,8 +222,25 @@ button { font: inherit; }
   color: var(--color-chip-dark-text);
 }
 .chip .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
   font-size: 14px;
   line-height: 1;
+  flex-shrink: 0;
+}
+.chip .icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.chip--light .icon { color: var(--color-chip-light-text); }
+.chip--dark .icon { color: var(--color-chip-dark-text); }
+.chip .flag-icon {
+  width: auto;
+  font-size: 14px;
 }
 
 /* =================== Section =================== */
@@ -258,19 +254,20 @@ button { font: inherit; }
   margin-bottom: var(--space-3x);
 }
 .section-circle {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--color-circle-bg);
+  background: #FDF2F8;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #C54C87;
 }
 .section-circle svg {
   width: 18px;
   height: 18px;
-  color: var(--color-chip-light-bg);
+  color: inherit;
 }
 .section-title {
   font-size: 16px;

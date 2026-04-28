@@ -1,10 +1,9 @@
 // Cloudflare Pages Function — renders the public profile page at
 // https://janerek.com/p/<token>. Visual structure mirrors the in-app
-// UserProfileFragment: photo pager (Instagram-story progress bars + dot
-// pagination + tap zones) → name + flag + verified badge → "X years old"
-// → light-pink highlight chips (looking-for, profession, education,
-// zodiac) → Story section → dark-wine tag chips (religion, nationality
-// with flag+demonym, "Speaks <language>").
+// UserProfileFragment: photo pager (Instagram-story progress pills) →
+// name + flag + verified badge → "X years old" → light-pink highlight
+// chips (looking-for, profession, education, zodiac) → dark-wine tag chips
+// (religion, nationality with flag+demonym, "Speaks <language>") → Story.
 
 interface Env {
   SUPABASE_URL: string;
@@ -27,7 +26,9 @@ interface PublicProfile {
   languages: unknown;
   religion: string | null;
   profession: string | null;
+  profession_id: number | null;
   education_specialization: string | null;
+  education_id: number | null;
   looking_for: number | null;
   zodiac_sign: string | null;
   is_verified: boolean;
@@ -91,9 +92,6 @@ function countryCodeToFlag(cc: string | null | undefined): string {
 }
 
 // Country code → demonym for the nationality chip (e.g. "SY" → "Syrian").
-// We don't need every country in the world — just enough that the chip
-// reads naturally. Falls back to the raw nationality string the RPC
-// returned (which itself falls back to the country code).
 const DEMONYMS: Record<string, string> = {
   AE: "Emirati", AF: "Afghan", AL: "Albanian", AM: "Armenian",
   AR: "Argentinian", AT: "Austrian", AU: "Australian", AZ: "Azerbaijani",
@@ -120,29 +118,96 @@ const DEMONYMS: Record<string, string> = {
   YE: "Yemeni", ZA: "South African",
 };
 
-function nationalityLabel(nat: string | null, cc: string | null): string {
-  if (nat) {
-    const code = nat.trim().toUpperCase();
-    if (/^[A-Z]{2}$/.test(code) && DEMONYMS[code]) return DEMONYMS[code];
-    return nat;
-  }
-  if (cc) {
-    const code = cc.trim().toUpperCase();
-    if (DEMONYMS[code]) return DEMONYMS[code];
-    return code;
-  }
-  return "";
+function nationalityLabel(nat: string | null): string | null {
+  if (!nat) return null;
+  const code = nat.trim().toUpperCase();
+  if (/^[A-Z]{2}$/.test(code) && DEMONYMS[code]) return DEMONYMS[code];
+  return nat;
 }
 
-// LookingFor enum mirrors com.aboutyou.productinfra.data.user.LookingFor.
-function lookingForLabel(id: number | null): string | null {
-  if (id == null) return null;
-  switch (id) {
-    case 0: return "Finding a life partner";
-    case 1: return "Still figuring out";
-    case 2: return "Meeting friends";
-    default: return null;
+// LookingFor enum → label (matches strings/looking_for_*). Mirror of
+// com.aboutyou.productinfra.data.user.LookingFor.
+const LOOKING_FOR_LABELS: Record<number, string> = {
+  0: "Finding a life partner",
+  1: "Still figuring out",
+  2: "Meeting friends",
+};
+
+// Profession enum id → label. Mirror of
+// com.aboutyou.productinfra.data.user.Profession + values/strings.xml.
+const PROFESSION_LABELS: Record<number, string> = {
+  0: "Student",
+  1: "Doctor",
+  2: "Pharmacist",
+  3: "Engineer",
+  4: "Teacher",
+  5: "Nurse",
+  6: "Accountant",
+  7: "Marketing Manager",
+  8: "Sales Representative",
+  9: "Artist",
+  10: "Chef",
+  11: "Economist",
+  12: "Business Owner",
+  13: "Other",
+};
+const PROFESSION_OTHER_ID = 13;
+
+// Education enum id → label. Mirror of
+// com.aboutyou.productinfra.data.user.Education + values/strings.xml.
+const EDUCATION_LABELS: Record<number, string> = {
+  0: "High school or less",
+  1: "Diploma",
+  2: "Bachelor",
+  3: "Master",
+  4: "Doctorate",
+};
+const EDUCATION_HIGH_SCHOOL_ID = 0;
+
+// Religion enum value → label. Mirror of
+// com.aboutyou.productinfra.data.user.Religion + values/strings.xml.
+const RELIGION_LABELS: Record<string, string> = {
+  SUNNI_ISLAM: "Sunni Islam",
+  SHIA_ISLAM: "Shia Islam",
+  ALAWISM: "Alawi Islam",
+  CHRISTIANITY: "Christianity",
+  DRUZE: "Druze",
+  ISMAILI: "Ismaili",
+  JUDAISM: "Judaism",
+  YAZIDISM: "Yazidism",
+  HINDUISM: "Hinduism",
+  BUDDHISM: "Buddhism",
+  SIKHISM: "Sikhism",
+  BAHAI: "Baha'i",
+  NON_RELIGIOUS: "Non-religious",
+  OTHER: "Other",
+};
+
+// Mirror of getFormattedProfession(): if id is OTHER/null, the freeform
+// text is what the user wrote; otherwise the localized enum label wins.
+function professionLabel(id: number | null, freeform: string | null): string | null {
+  if (id == null || id === PROFESSION_OTHER_ID) {
+    const t = (freeform ?? "").trim();
+    return t.length ? t : null;
   }
+  return PROFESSION_LABELS[id] ?? null;
+}
+
+// Mirror of getFormattedEducation(): high-school has no specialization,
+// other levels combine "<level> in <specialization>" if available.
+function educationLabel(id: number | null, specialization: string | null): string | null {
+  if (id == null) return null;
+  const level = EDUCATION_LABELS[id];
+  if (!level) return null;
+  if (id === EDUCATION_HIGH_SCHOOL_ID) return level;
+  const spec = (specialization ?? "").trim();
+  return spec.length ? `${level} in ${spec}` : level;
+}
+
+function religionLabel(raw: string | null): string | null {
+  if (!raw) return null;
+  const key = raw.trim().toUpperCase();
+  return RELIGION_LABELS[key] ?? raw;
 }
 
 function zodiacLabel(z: string | null): string | null {
@@ -150,12 +215,6 @@ function zodiacLabel(z: string | null): string | null {
   const lower = z.toLowerCase();
   return lower.charAt(0).toUpperCase() + lower.slice(1);
 }
-
-const ZODIAC_EMOJI: Record<string, string> = {
-  aries: "♈", taurus: "♉", gemini: "♊", cancer: "♋",
-  leo: "♌", virgo: "♍", libra: "♎", scorpio: "♏",
-  sagittarius: "♐", capricorn: "♑", aquarius: "♒", pisces: "♓",
-};
 
 // Common ISO-639 language codes the Janerek client emits → English label.
 const LANGUAGE_NAMES: Record<string, string> = {
@@ -183,9 +242,17 @@ function languageLabel(lang: string): string {
 
 const VERIFIED_SVG = `<svg class="verified-badge" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Verified"><path d="M12 1l2.39 2.06 3.13-.4.91 3.04 2.96 1.31-.94 3 1 3-3 1.3-.91 3.04-3.13-.4L12 19.7l-2.4-2.06-3.13.4-.91-3.04-3-1.3 1-3-1-3 3-1.3.91-3.04 3.13.4L12 1z" fill="#1C64F2"/><path d="M8.4 12.2l2.5 2.5 4.9-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-// Running-figure icon for the "Story" section header — matches the Android
-// design's animated story circle.
-const STORY_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="13" cy="4.5" r="2" fill="currentColor"/><path d="M7 13l3-3 3 1.5L17 9l2 2-4 3-2-1-2 4 3 3-1 2-4-3-1-4-3 1 1-3z" fill="currentColor"/></svg>`;
+// Story icon — direct path port of res/drawable/ic_story.xml so the public
+// page header matches the in-app pink-circle "His Story" icon byte-for-byte.
+const STORY_SVG = `<svg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10.625,18.125L5,23.75L6.875,25.625L11.25,21.25H13.75L10.625,18.125ZM18.75,1.25C17.375,1.25 16.25,2.375 16.25,3.75C16.25,5.125 17.375,6.25 18.75,6.25C20.125,6.25 21.25,5.125 21.25,3.75C21.25,2.375 20.125,1.25 18.75,1.25ZM26.25,26.263L22.5,30L18.763,26.237V24.375L9.887,15.512C9.5,15.575 9.125,15.6 8.75,15.6V12.9C10.825,12.938 13.262,11.813 14.587,10.35L16.337,8.413C16.575,8.15 16.875,7.938 17.2,7.787C17.563,7.613 17.975,7.5 18.4,7.5H18.438C19.987,7.512 21.25,8.775 21.25,10.325V17.513C21.25,18.563 20.813,19.525 20.1,20.212L15.625,15.738V12.9C14.837,13.55 13.837,14.175 12.762,14.637L20.625,22.5H22.5L26.25,26.263Z" fill="currentColor"/></svg>`;
+
+// Highlight icons — match the Material drawables Android uses
+// (ic_looking_for_figuring_out, ic_material_work, ic_school) so the chips
+// look identical between native and web.
+const ICON_LOOKING_FOR = `<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M784,840 L532,588q-30,24 -69,38t-83,14q-109,0 -184.5,-75.5T120,380q0,-109 75.5,-184.5T380,120q109,0 184.5,75.5T640,380q0,44 -14,83t-38,69l252,252 -56,56ZM380,560q75,0 127.5,-52.5T560,380q0,-75 -52.5,-127.5T380,200q-75,0 -127.5,52.5T200,380q0,75 52.5,127.5T380,560Z" fill="currentColor"/></svg>`;
+const ICON_WORK = `<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M160,840q-33,0 -56.5,-23.5T80,760v-440q0,-33 23.5,-56.5T160,240h160v-80q0,-33 23.5,-56.5T400,80h160q33,0 56.5,23.5T640,160v80h160q33,0 56.5,23.5T880,320v440q0,33 -23.5,56.5T800,840L160,840ZM160,760h640v-440L160,320v440ZM400,240h160v-80L400,160v80ZM160,760v-440,440Z" fill="currentColor"/></svg>`;
+const ICON_SCHOOL = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5,13.18v4L12,21l7,-3.82v-4L12,17l-7,-3.82zM12,3L1,9l11,6 9,-4.91V17h2V9L12,3z" fill="currentColor"/></svg>`;
+const ICON_ZODIAC = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l1.6 4.95H18.8l-4.2 3.05 1.6 4.95L12 11.9l-4.2 3.05 1.6-4.95L5.2 6.95h5.2L12 2z" fill="currentColor"/></svg>`;
 
 const ARROW_LEFT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
 const ARROW_RIGHT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
@@ -284,42 +351,48 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const bars = photoCount > 0
     ? photoIds.map((_, i) => `<div class="pager__bar${i === 0 ? " is-active" : ""}"></div>`).join("")
     : "";
-  const dots = photoCount > 0
-    ? photoIds.map((_, i) => `<div class="pager__dot${i === 0 ? " is-active" : ""}"></div>`).join("")
-    : "";
 
   const pagerSingle = photoCount <= 1 ? " pager--single" : "";
   const pagerHtml = `
 <div class="pager${pagerSingle}" id="pager" data-count="${photoCount}">
-  <div class="pager__bars">${bars}</div>
   <div class="pager__track" id="pagerTrack">${slides}</div>
+  <div class="pager__bars">${bars}</div>
   <button type="button" class="pager__zone pager__zone--prev" id="pagerPrev" aria-label="Previous photo"></button>
   <button type="button" class="pager__zone pager__zone--next" id="pagerNext" aria-label="Next photo"></button>
   <div class="pager__arrow pager__arrow--prev" id="pagerArrowPrev">${ARROW_LEFT}</div>
   <div class="pager__arrow pager__arrow--next" id="pagerArrowNext">${ARROW_RIGHT}</div>
-  <div class="pager__dots">${dots}</div>
 </div>`;
 
-  // ---- Highlights (light pink chips) ----
+  // ---- Highlights (light pink chips) — order matches Android getHighlights():
+  // looking_for, profession, education, zodiac. ----
   const highlights: string[] = [];
-  const lookingFor = lookingForLabel(p.looking_for);
-  if (lookingFor) highlights.push(`<span class="chip chip--light"><span class="icon">🔍</span>${escapeHtml(lookingFor)}</span>`);
-  if (p.profession) highlights.push(`<span class="chip chip--light"><span class="icon">💼</span>${escapeHtml(p.profession)}</span>`);
-  if (p.education_specialization) highlights.push(`<span class="chip chip--light"><span class="icon">🎓</span>${escapeHtml(p.education_specialization)}</span>`);
+  const lookingFor = p.looking_for != null ? LOOKING_FOR_LABELS[p.looking_for] : null;
+  if (lookingFor) {
+    highlights.push(`<span class="chip chip--light"><span class="icon">${ICON_LOOKING_FOR}</span>${escapeHtml(lookingFor)}</span>`);
+  }
+  const profession = professionLabel(p.profession_id, p.profession);
+  if (profession) {
+    highlights.push(`<span class="chip chip--light"><span class="icon">${ICON_WORK}</span>${escapeHtml(profession)}</span>`);
+  }
+  const education = educationLabel(p.education_id, p.education_specialization);
+  if (education) {
+    highlights.push(`<span class="chip chip--light"><span class="icon">${ICON_SCHOOL}</span>${escapeHtml(education)}</span>`);
+  }
   const zodiac = zodiacLabel(p.zodiac_sign);
   if (zodiac) {
-    const z = (p.zodiac_sign ?? "").toLowerCase();
-    const emoji = ZODIAC_EMOJI[z] ?? "✨";
-    highlights.push(`<span class="chip chip--light"><span class="icon">${emoji}</span>${escapeHtml(zodiac)}</span>`);
+    highlights.push(`<span class="chip chip--light"><span class="icon">${ICON_ZODIAC}</span>${escapeHtml(zodiac)}</span>`);
   }
 
-  // ---- Tags (dark wine chips) — religion, nationality with flag, languages "Speaks X" ----
+  // ---- Tags (dark wine chips) — religion, nationality flag+demonym,
+  // "Speaks <language>". Flag follows nationality (their country of origin),
+  // not country_code (where they currently live). ----
   const tags: string[] = [];
-  if (p.religion) tags.push(`<span class="chip chip--dark"><span class="icon">☪︎</span>${escapeHtml(p.religion)}</span>`);
-  const natLabel = nationalityLabel(p.nationality, p.country_code);
+  const religion = religionLabel(p.religion);
+  if (religion) tags.push(`<span class="chip chip--dark">${escapeHtml(religion)}</span>`);
+  const natLabel = nationalityLabel(p.nationality);
   if (natLabel) {
-    const flag = countryCodeToFlag(p.country_code) || countryCodeToFlag(p.nationality);
-    tags.push(`<span class="chip chip--dark">${flag ? `<span class="icon">${flag}</span>` : ""}${escapeHtml(natLabel)}</span>`);
+    const flag = countryCodeToFlag(p.nationality);
+    tags.push(`<span class="chip chip--dark">${flag ? `<span class="icon flag-icon">${flag}</span>` : ""}${escapeHtml(natLabel)}</span>`);
   }
   for (const lang of asStringArray(p.languages)) {
     const label = languageLabel(lang);
@@ -327,8 +400,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   }
   const tagsHtml = tags.join("");
 
-  // ---- Name row: name + nationality flag + verified badge ----
-  const nameFlag = countryCodeToFlag(p.country_code) || countryCodeToFlag(p.nationality);
+  // Name row flag follows nationality too, falling back to current location
+  // if nationality is missing.
+  const nameFlag = countryCodeToFlag(p.nationality) || countryCodeToFlag(p.country_code);
 
   const storyTitle = (() => {
     const g = (p.gender ?? "").toLowerCase();
@@ -407,7 +481,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 </div>
 
 <script>
-  // Photo pager — Instagram-story style. Click left/right zones, top
+  // Photo pager — Instagram-story style. Click left/right zones, tap top
   // progress pill, or swipe horizontally on touch devices.
   (function () {
     var pager = document.getElementById('pager');
@@ -417,7 +491,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     var track = document.getElementById('pagerTrack');
     var bars = pager.querySelectorAll('.pager__bar');
-    var dots = pager.querySelectorAll('.pager__dot');
     var prevArrow = document.getElementById('pagerArrowPrev');
     var nextArrow = document.getElementById('pagerArrowNext');
     var index = 0;
@@ -426,9 +499,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       track.style.transform = 'translateX(-' + (index * 100) + '%)';
       for (var i = 0; i < bars.length; i++) {
         bars[i].classList.toggle('is-active', i === index);
-      }
-      for (var j = 0; j < dots.length; j++) {
-        dots[j].classList.toggle('is-active', j === index);
       }
       prevArrow.classList.toggle('is-disabled', index === 0);
       nextArrow.classList.toggle('is-disabled', index === count - 1);
