@@ -1,23 +1,31 @@
-/* Janerek public profile — matches the in-app UserProfileFragment design.
-   Light theme, white background, pink-tinted chips, purple primary. */
+/* Janerek public profile — mirrors the in-app UserProfileFragment.
+   Dark background with photo pagination (Instagram-story progress pills),
+   light pink highlight chips, dark wine tag chips. */
 
 :root {
   --color-primary: #6542AD;
   --color-primary-pressed: #553990;
-  --color-bg: #FFFFFF;
-  --color-text: #111928;
-  --color-text-soft: #6B7280;
-  --color-text-pink-dark: #A3346A;
-  --color-chip-bg: #FCE8F3;
-  --color-circle-bg: #FDF2F8;
-  --color-card-fallback: #F3F4F6;
-  --color-divider: #E5E7EB;
+  --color-bg: #0F1115;
+  --color-surface: #1A1D24;
+  --color-text: #FFFFFF;
+  --color-text-soft: #9CA3AF;
+  --color-divider: #2A2F38;
+
+  --color-chip-light-bg: #FCE8F3;
+  --color-chip-light-text: #A3346A;
+  --color-chip-dark-bg: #4A1E3A;
+  --color-chip-dark-text: #F8C6DD;
+
+  --color-circle-bg: rgba(252, 232, 243, 0.10);
+  --color-card-fallback: #1F2230;
+
   --space-1x: 4px;
   --space-2x: 8px;
+  --space-3x: 12px;
   --space-4x: 16px;
   --space-6x: 24px;
   --space-8x: 32px;
-  --radius-sm: 8px;
+  --radius-sm: 10px;
   --radius-md: 16px;
   --radius-pill: 999px;
 }
@@ -43,35 +51,129 @@ button { font: inherit; }
   padding-bottom: 96px;
   background: var(--color-bg);
   position: relative;
+  min-height: 100vh;
 }
 
-/* =================== Vertical photo stack =================== */
-/* Every photo is rendered 1:1 full-width, stacked vertically. The user
-   scrolls down to see all photos — feels app-native and shows everything
-   at once instead of hiding photos behind a horizontal swipe. */
-.photos {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--color-card-fallback);
-}
-.photos .photo {
+/* =================== Photo pager =================== */
+.pager {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   background: var(--color-card-fallback);
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.photos .photo img {
+.pager__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+.pager__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.pager__slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.photos .photo--empty {
-  background: var(--color-card-fallback);
+
+/* Top progress pills — Instagram-story style. One pill per photo. */
+.pager__bars {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+  z-index: 3;
+}
+.pager__bar {
+  flex: 1 1 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.30);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.pager__bar.is-active {
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Pulls the content card up over the last photo's bottom edge with rounded corners. */
+/* Left/right click zones for keyboard-free navigation. */
+.pager__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  z-index: 2;
+  background: transparent;
+  cursor: pointer;
+  border: 0;
+}
+.pager__zone--prev { left: 0; }
+.pager__zone--next { right: 0; }
+
+/* Visible chevrons on hover/touch. */
+.pager__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+.pager:hover .pager__arrow,
+.pager.is-touched .pager__arrow { opacity: 1; }
+.pager__arrow--prev { left: 10px; }
+.pager__arrow--next { right: 10px; }
+.pager__arrow.is-disabled { opacity: 0 !important; }
+
+/* Bottom dot pagination — small dots beneath photo. */
+.pager__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+.pager__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.40);
+}
+.pager__dot.is-active {
+  background: #fff;
+  width: 18px;
+  border-radius: 3px;
+}
+
+.pager--single .pager__bars,
+.pager--single .pager__zone,
+.pager--single .pager__arrow,
+.pager--single .pager__dots {
+  display: none;
+}
+
+/* =================== Content =================== */
 .transition {
   height: 16px;
   margin-top: -16px;
@@ -81,8 +183,6 @@ button { font: inherit; }
   position: relative;
   z-index: 1;
 }
-
-/* =================== Content =================== */
 .content {
   padding: var(--space-2x) var(--space-4x) var(--space-4x);
 }
@@ -90,20 +190,24 @@ button { font: inherit; }
 .name-row {
   display: flex;
   align-items: center;
-  gap: var(--space-1x);
+  gap: var(--space-2x);
+  flex-wrap: wrap;
 }
 .name {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text);
   line-height: 1.2;
 }
+.flag {
+  font-size: 24px;
+  line-height: 1;
+}
 .verified-badge {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  margin-left: var(--space-1x);
 }
 
 .age-line {
@@ -113,48 +217,49 @@ button { font: inherit; }
   font-weight: 500;
 }
 
-/* =================== Chips (single style for highlights + flat tags) ====== */
-/* Mirrors item_tags_flexbox_secondary.xml: 8dp rounded, pink_lightest bg,
-   pink_dark text, ~16dp horizontal / 4dp vertical padding. */
+/* =================== Chips =================== */
 .chips {
   margin-top: var(--space-4x);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2x);
 }
-.chips--flat {
-  margin-top: var(--space-6x);
-}
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-chip-bg);
-  color: var(--color-text-pink-dark);
   border-radius: var(--radius-sm);
-  padding: 6px var(--space-4x);
+  padding: 8px var(--space-4x);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
+}
+.chip--light {
+  background: var(--color-chip-light-bg);
+  color: var(--color-chip-light-text);
+}
+.chip--dark {
+  background: var(--color-chip-dark-bg);
+  color: var(--color-chip-dark-text);
 }
 .chip .icon {
   font-size: 14px;
   line-height: 1;
 }
 
-/* =================== Story section =================== */
-.story {
+/* =================== Section =================== */
+.section {
   margin-top: var(--space-6x);
 }
 .section-head {
   display: flex;
   align-items: center;
-  gap: var(--space-4x);
-  margin-bottom: var(--space-4x);
+  gap: var(--space-3x);
+  margin-bottom: var(--space-3x);
 }
 .section-circle {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--color-circle-bg);
   display: flex;
@@ -165,7 +270,7 @@ button { font: inherit; }
 .section-circle svg {
   width: 18px;
   height: 18px;
-  color: var(--color-text-pink-dark);
+  color: var(--color-chip-light-bg);
 }
 .section-title {
   font-size: 16px;
@@ -178,6 +283,7 @@ button { font: inherit; }
   white-space: pre-wrap;
   word-break: break-word;
 }
+.section .chips { margin-top: 0; }
 
 /* =================== Sticky CTA =================== */
 .cta-bar {
@@ -186,7 +292,7 @@ button { font: inherit; }
   right: 0;
   bottom: 0;
   padding: var(--space-2x) var(--space-4x) calc(var(--space-2x) + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--color-bg) 60%, rgba(255, 255, 255, 0));
+  background: linear-gradient(to top, var(--color-bg) 60%, rgba(15, 17, 21, 0));
   display: flex;
   justify-content: center;
   pointer-events: none;
@@ -195,7 +301,7 @@ button { font: inherit; }
 .cta {
   pointer-events: auto;
   background: var(--color-primary);
-  color: white;
+  color: #fff;
   border: none;
   border-radius: var(--radius-pill);
   padding: 14px 28px;
@@ -203,7 +309,7 @@ button { font: inherit; }
   font-weight: 600;
   width: 100%;
   max-width: 448px;
-  box-shadow: 0 8px 24px rgba(101, 66, 173, 0.32);
+  box-shadow: 0 8px 24px rgba(101, 66, 173, 0.40);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -227,7 +333,7 @@ button { font: inherit; }
   display: inline-block;
   margin-top: var(--space-6x);
   background: var(--color-primary);
-  color: white;
+  color: #fff;
   padding: 12px 22px;
   border-radius: var(--radius-pill);
   font-weight: 600;
@@ -237,21 +343,22 @@ button { font: inherit; }
 /* =================== Tablet + desktop responsive ============= */
 @media (min-width: 640px) {
   body {
-    background: #F3F4F6;
+    background: #060709;
     padding: 32px 16px;
   }
   .shell {
     margin: 0 auto 80px;
     border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 24px 60px rgba(85, 57, 144, 0.16),
-                0 4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6),
+                0 4px 12px rgba(0, 0, 0, 0.4);
+    min-height: auto;
   }
   .cta-bar {
     position: sticky;
     bottom: 0;
     margin: 0 -16px -16px;
-    background: linear-gradient(to top, var(--color-bg) 70%, rgba(255,255,255,0));
+    background: linear-gradient(to top, var(--color-bg) 70%, rgba(15, 17, 21, 0));
   }
 }
 @media (min-width: 1024px) {
