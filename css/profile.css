@@ -2,16 +2,16 @@
    Light theme, white background, pink-tinted chips, purple primary. */
 
 :root {
-  --color-primary: #6542AD;          /* purple_primary_600 */
-  --color-primary-pressed: #553990;  /* purple_primary_700 */
-  --color-bg: #FFFFFF;               /* color_background */
-  --color-text: #111928;             /* grey_900 */
-  --color-text-soft: #6B7280;        /* grey_500 */
-  --color-text-pink-dark: #A3346A;   /* pink_700 */
-  --color-chip-bg: #FCE8F3;          /* pink_100 / container_pink_lightest */
-  --color-circle-bg: #FDF2F8;        /* pink_50 / container_pink_pale */
-  --color-divider: #E5E7EB;          /* grey_200 */
-  --color-verified: #1C64F2;         /* container_blue_medium */
+  --color-primary: #6542AD;
+  --color-primary-pressed: #553990;
+  --color-bg: #FFFFFF;
+  --color-text: #111928;
+  --color-text-soft: #6B7280;
+  --color-text-pink-dark: #A3346A;
+  --color-chip-bg: #FCE8F3;
+  --color-circle-bg: #FDF2F8;
+  --color-card-fallback: #F3F4F6;
+  --color-divider: #E5E7EB;
   --space-1x: 4px;
   --space-2x: 8px;
   --space-4x: 16px;
@@ -31,7 +31,7 @@ body {
   color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  font-size: 14px;                    /* Body2 */
+  font-size: 14px;
 }
 
 img { display: block; max-width: 100%; }
@@ -40,61 +40,38 @@ button { font: inherit; }
 .shell {
   max-width: 480px;
   margin: 0 auto;
-  padding-bottom: 96px;               /* room for sticky CTA */
+  padding-bottom: 96px;
   background: var(--color-bg);
   position: relative;
 }
 
-/* =================== Photo carousel (1:1 full-width) =================== */
+/* =================== Vertical photo stack =================== */
+/* Every photo is rendered 1:1 full-width, stacked vertically. The user
+   scrolls down to see all photos — feels app-native and shows everything
+   at once instead of hiding photos behind a horizontal swipe. */
 .photos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--color-card-fallback);
+}
+.photos .photo {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  background: var(--color-card-fallback);
+  overflow: hidden;
 }
-.photos::-webkit-scrollbar { display: none; }
-.photos .slide {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  width: 100%;
-  height: 100%;
-  background: #F3F4F6;
-}
-.photos .slide img {
+.photos .photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.photos .indicators {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: var(--space-4x);
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  pointer-events: none;
-}
-.photos .indicators .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
-  transition: width 0.2s, background 0.2s;
-}
-.photos .indicators .dot.active {
-  width: 18px;
-  border-radius: var(--radius-pill);
-  background: white;
+.photos .photo--empty {
+  background: var(--color-card-fallback);
 }
 
-/* Pulls the content card up over the photo's bottom edge with rounded corners */
+/* Pulls the content card up over the last photo's bottom edge with rounded corners. */
 .transition {
   height: 16px;
   margin-top: -16px;
@@ -116,44 +93,51 @@ button { font: inherit; }
   gap: var(--space-1x);
 }
 .name {
-  font-size: 24px;                    /* Headline1.Bold */
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text);
   line-height: 1.2;
 }
 .verified-badge {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   margin-left: var(--space-1x);
 }
 
 .age-line {
   margin-top: var(--space-1x);
-  font-size: 14px;
-  color: var(--color-text-soft);
+  font-size: 16px;
+  color: var(--color-text);
+  font-weight: 500;
 }
 
-/* =================== Highlight chips (with icons) =================== */
-.highlights {
+/* =================== Chips (single style for highlights + flat tags) ====== */
+/* Mirrors item_tags_flexbox_secondary.xml: 8dp rounded, pink_lightest bg,
+   pink_dark text, ~16dp horizontal / 4dp vertical padding. */
+.chips {
   margin-top: var(--space-4x);
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2x);
 }
-.highlight {
+.chips--flat {
+  margin-top: var(--space-6x);
+}
+.chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
   background: var(--color-chip-bg);
   color: var(--color-text-pink-dark);
+  border-radius: var(--radius-sm);
+  padding: 6px var(--space-4x);
   font-size: 13px;
   font-weight: 500;
+  line-height: 1.3;
 }
-.highlight .icon {
+.chip .icon {
   font-size: 14px;
   line-height: 1;
 }
@@ -184,7 +168,7 @@ button { font: inherit; }
   color: var(--color-text-pink-dark);
 }
 .section-title {
-  font-size: 16px;                    /* Body1.Bold */
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text);
 }
@@ -193,22 +177,6 @@ button { font: inherit; }
   color: var(--color-text);
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-/* =================== Flat tag flexbox =================== */
-.tags {
-  margin-top: var(--space-6x);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2x);
-}
-.tag {
-  background: var(--color-chip-bg);
-  color: var(--color-text-pink-dark);
-  border-radius: var(--radius-sm);
-  padding: 6px var(--space-4x);
-  font-size: 13px;
-  font-weight: 500;
 }
 
 /* =================== Sticky CTA =================== */
@@ -244,21 +212,7 @@ button { font: inherit; }
 }
 .cta:active { background: var(--color-primary-pressed); }
 
-/* =================== Footer =================== */
-.foot {
-  margin-top: var(--space-6x);
-  padding: 0 var(--space-4x);
-  text-align: center;
-  font-size: 12px;
-  color: var(--color-text-soft);
-}
-.foot a {
-  color: var(--color-text-soft);
-  margin: 0 var(--space-2x);
-  text-decoration: none;
-}
-
-/* =================== Not-found state =================== */
+/* =================== Not-found =================== */
 .notfound {
   text-align: center;
   padding: 80px var(--space-6x);
@@ -281,9 +235,6 @@ button { font: inherit; }
 }
 
 /* =================== Tablet + desktop responsive ============= */
-/* Mobile-first base above; on wider viewports the .shell becomes a centered
-   "phone-shaped" card so it doesn't look like a narrow column floating in
-   white space. */
 @media (min-width: 640px) {
   body {
     background: #F3F4F6;
@@ -297,7 +248,6 @@ button { font: inherit; }
                 0 4px 12px rgba(0, 0, 0, 0.04);
   }
   .cta-bar {
-    /* Anchor CTA to the card's bottom edge instead of the viewport. */
     position: sticky;
     bottom: 0;
     margin: 0 -16px -16px;
@@ -305,10 +255,6 @@ button { font: inherit; }
   }
 }
 @media (min-width: 1024px) {
-  body {
-    padding: 48px 16px;
-  }
-  .shell {
-    max-width: 520px;
-  }
+  body { padding: 48px 16px; }
+  .shell { max-width: 520px; }
 }

@@ -1,8 +1,9 @@
 // Cloudflare Pages Function — renders the public profile page at
 // https://janerek.com/p/<token>. Visual structure mirrors the in-app
-// UserProfileFragment layout (1:1 hero photo carousel → name + verified
-// badge → age/location line → highlight chips → "Story" section with
-// pink-circle icon header → flat pink tag flexbox).
+// UserProfileFragment: vertical photo stack → name + verified badge →
+// age line → highlight chips (city + profession + education + religion) →
+// "Story" section with pink-circle icon header → flat pink tag flexbox
+// (gender, nationality, languages).
 
 interface Env {
   SUPABASE_URL: string;
@@ -39,15 +40,18 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function asArray(v: unknown): string[] {
+// Defensively turn an unknown JSONB value into a string array. Handles
+// real arrays, JSON-encoded strings, and single-string values (Janerek
+// `nationality` is a plain text column, for example).
+function asStringArray(v: unknown): string[] {
   if (!v) return [];
-  if (Array.isArray(v)) return v.map((x) => String(x));
+  if (Array.isArray(v)) return v.map((x) => String(x)).filter(Boolean);
   if (typeof v === "string") {
     const t = v.trim();
     if (t.startsWith("[")) {
       try {
         const j = JSON.parse(t);
-        if (Array.isArray(j)) return j.map(String);
+        if (Array.isArray(j)) return j.map(String).filter(Boolean);
       } catch { /* fall through */ }
     }
     return t ? [t] : [];
@@ -55,8 +59,36 @@ function asArray(v: unknown): string[] {
   return [];
 }
 
-const VERIFIED_SVG = `<svg class="verified-badge" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Verified"><path d="M12 1.5l2.4 2.1 3.2-.4.9 3.1 3 1.3-1 3 1 3-3 1.3-.9 3.1-3.2-.4L12 19.7l-2.4-2.1-3.2.4-.9-3.1-3-1.3 1-3-1-3 3-1.3.9-3.1 3.2.4L12 1.5z" fill="#1C64F2"/><path d="M9.7 12.4l1.7 1.7 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Pulls photo IDs out of `users.profile_photos`, which is a JSONB array of
+// raw photo-id strings (e.g. ["abc123…", "def456…"]). Tolerates the column
+// arriving as a string-encoded array or as an array of objects with `.id`.
+function extractPhotoIds(v: unknown): string[] {
+  let arr: unknown[] = [];
+  if (Array.isArray(v)) arr = v;
+  else if (typeof v === "string") {
+    try {
+      const j = JSON.parse(v);
+      if (Array.isArray(j)) arr = j;
+    } catch { /* ignore */ }
+  }
+  return arr
+    .map((x) => {
+      if (typeof x === "string") return x;
+      if (x && typeof x === "object") {
+        const o = x as Record<string, unknown>;
+        const candidate = o.id ?? o.photoId ?? o.photo_id ?? o.path ?? o.name;
+        return typeof candidate === "string" ? candidate : null;
+      }
+      return null;
+    })
+    .filter((x): x is string => Boolean(x));
+}
 
+// Blue verified seal — same visual language as the in-app
+// ic_verified_checkmark.xml drawable. Filled circle with a white check.
+const VERIFIED_SVG = `<svg class="verified-badge" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Verified"><path d="M12 1l2.39 2.06 3.13-.4.91 3.04 2.96 1.31-.94 3 1 3-3 1.3-.91 3.04-3.13-.4L12 19.7l-2.4-2.06-3.13.4-.91-3.04-3-1.3 1-3-1-3 3-1.3.91-3.04 3.13.4L12 1z" fill="#1C64F2"/><path d="M8.4 12.2l2.5 2.5 4.9-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// Document/story icon for the "Story" section header pink circle.
 const STORY_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 4a2 2 0 012-2h7l5 5v13a2 2 0 01-2 2H7a2 2 0 01-2-2V4z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v5h5M9 13h6M9 17h6M9 9h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 function notFound(host: string, appName: string): Response {
@@ -124,8 +156,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }).catch(() => undefined),
   );
 
-  const photos = Array.isArray(p.profile_photos) ? p.profile_photos : [];
-  const photoCount = photos.length;
+  const photoIds = extractPhotoIds(p.profile_photos);
+  const photoCount = photoIds.length;
   const ogImageUrl = photoCount > 0
     ? `https://${host}/p/${token}/img/0.jpg`
     : `https://${host}/assets/og-default.jpg`;
@@ -136,10 +168,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     : `I'm using ${appName} to find meaningful connections.`;
 
   const cityLine = [p.city, p.country_code].filter(Boolean).join(", ");
-  const ageCityLine = [
-    typeof p.age === "number" ? `${p.age}` : null,
-    cityLine || null,
-  ].filter(Boolean).join(" · ");
 
   const playStoreUrl = env.PLAY_STORE_URL ??
     `https://play.google.com/store/apps/details?id=com.janerek`;
@@ -147,39 +175,35 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     `https://apps.apple.com/app/janerek`;
   const shareUrl = `https://${host}/p/${token}`;
 
-  // Photo carousel slides
-  const slides = photoCount > 0
-    ? photos
+  // Vertical photo stack — every photo shown 1:1 full-width, scrolled
+  // through naturally instead of horizontally swiped.
+  const photoStack = photoCount > 0
+    ? photoIds
         .map((_, i) =>
-          `<div class="slide"><img src="/p/${token}/img/${i}.jpg" alt="${escapeHtml(p.name)}" loading="${i === 0 ? "eager" : "lazy"}"></div>`
+          `<div class="photo"><img src="/p/${token}/img/${i}.jpg" alt="${escapeHtml(p.name)}" loading="${i === 0 ? "eager" : "lazy"}"></div>`
         )
         .join("")
-    : `<div class="slide"></div>`;
+    : `<div class="photo photo--empty"></div>`;
 
-  const indicators = photoCount > 1
-    ? `<div class="indicators">${
-        photos.map((_, i) => `<span class="dot${i === 0 ? " active" : ""}" data-i="${i}"></span>`).join("")
-      }</div>`
-    : "";
-
-  // Highlight chips with emoji icons (mirrors the in-app highlights row).
-  // Profession 💼, Education 🎓, Religion ☪️ — only show what's filled.
+  // Highlight row: city, profession, education, religion. Each is a chip
+  // with an emoji icon — mirrors the in-app highlights row.
   const highlights: string[] = [];
-  if (p.profession) highlights.push(`<span class="highlight"><span class="icon">💼</span>${escapeHtml(p.profession)}</span>`);
-  if (p.education_specialization) highlights.push(`<span class="highlight"><span class="icon">🎓</span>${escapeHtml(p.education_specialization)}</span>`);
-  if (p.religion) highlights.push(`<span class="highlight"><span class="icon">☪︎</span>${escapeHtml(p.religion)}</span>`);
+  if (cityLine) highlights.push(`<span class="chip"><span class="icon">📍</span>${escapeHtml(cityLine)}</span>`);
+  if (p.profession) highlights.push(`<span class="chip"><span class="icon">💼</span>${escapeHtml(p.profession)}</span>`);
+  if (p.education_specialization) highlights.push(`<span class="chip"><span class="icon">🎓</span>${escapeHtml(p.education_specialization)}</span>`);
+  if (p.religion) highlights.push(`<span class="chip"><span class="icon">☪︎</span>${escapeHtml(p.religion)}</span>`);
 
-  // Flat tag chips: gender, nationality, languages.
-  const languages = asArray(p.languages);
+  // Flat tags below the story: gender, nationality, languages.
+  const languages = asStringArray(p.languages);
   const flatTags: string[] = [];
   if (p.gender) flatTags.push(p.gender);
   if (p.nationality) flatTags.push(p.nationality);
   flatTags.push(...languages);
   const flatTagsHtml = flatTags
-    .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
+    .map((t) => `<span class="chip">${escapeHtml(t)}</span>`)
     .join("");
 
-  // Pronoun-aware story title to match Android's "Her Story" / "His Story".
+  // Pronoun-aware story title — Android shows "Her Story" / "His Story".
   const storyTitle = (() => {
     const g = (p.gender ?? "").toLowerCase();
     if (g.includes("female") || g === "woman" || g === "her") return "Her Story";
@@ -214,7 +238,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 </head>
 <body>
 <div class="shell">
-  <div class="photos" id="photos">${slides}${indicators}</div>
+  <div class="photos">${photoStack}</div>
   <div class="transition"></div>
 
   <div class="content">
@@ -222,9 +246,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       <h1 class="name">${escapeHtml(p.name)}</h1>
       ${p.is_verified ? VERIFIED_SVG : ""}
     </div>
-    ${ageCityLine ? `<div class="age-line">${escapeHtml(ageCityLine)}</div>` : ""}
+    ${typeof p.age === "number" ? `<div class="age-line">${p.age}</div>` : ""}
 
-    ${highlights.length ? `<div class="highlights">${highlights.join("")}</div>` : ""}
+    ${highlights.length ? `<div class="chips">${highlights.join("")}</div>` : ""}
 
     ${
       bio
@@ -238,14 +262,8 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         : ""
     }
 
-    ${flatTagsHtml ? `<div class="tags">${flatTagsHtml}</div>` : ""}
+    ${flatTagsHtml ? `<div class="chips chips--flat">${flatTagsHtml}</div>` : ""}
   </div>
-
-  <footer class="foot">
-    <a href="mailto:report@${host}?subject=Report%20profile%20${encodeURIComponent(token)}">Report this profile</a>
-    <span>·</span>
-    <a href="https://${host}/privacy.html">Privacy</a>
-  </footer>
 </div>
 
 <div class="cta-bar">
@@ -262,25 +280,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 </div>
 
 <script>
-  // Active dot tracking on photo carousel scroll.
-  (function () {
-    var el = document.getElementById('photos');
-    if (!el) return;
-    var dots = el.querySelectorAll('.dot');
-    if (!dots.length) return;
-    el.addEventListener('scroll', function () {
-      var i = Math.round(el.scrollLeft / el.clientWidth);
-      dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
-    }, { passive: true });
-  })();
-
-  // CTA: route by platform.
-  // Android — use intent:// URL. If com.janerek is installed AND has a verified
-  // App Link for the host, Android opens the app. Otherwise S.browser_fallback_url
-  // takes over and Play Store opens.
-  // iOS — try the Universal Link once; if the user's still here after 1.5s the
-  // app isn't installed so we redirect to the App Store.
-  // Desktop — the link's default href is the Play Store, so the click just opens it.
   (function () {
     var btn = document.getElementById('open-app');
     if (!btn) return;
