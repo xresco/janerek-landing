@@ -250,9 +250,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
 <div class="cta-bar">
   <a class="cta" id="open-app"
-     href="${shareUrl}"
-     data-android="${playStoreUrl}"
-     data-ios="${appStoreUrl}">
+     href="${playStoreUrl}"
+     data-host="${host}"
+     data-token="${token}"
+     data-android-pkg="com.janerek"
+     data-android-store="${playStoreUrl}"
+     data-ios-store="${appStoreUrl}"
+     data-universal-link="${shareUrl}">
     Open in ${escapeHtml(appName)}
   </a>
 </div>
@@ -266,28 +270,38 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (!dots.length) return;
     el.addEventListener('scroll', function () {
       var i = Math.round(el.scrollLeft / el.clientWidth);
-      dots.forEach(function (d, j) {
-        d.classList.toggle('active', j === i);
-      });
+      dots.forEach(function (d, j) { d.classList.toggle('active', j === i); });
     }, { passive: true });
   })();
 
-  // CTA: try Universal/App Link first, fall back to store after delay.
+  // CTA: route by platform.
+  // Android — use intent:// URL. If com.janerek is installed AND has a verified
+  // App Link for the host, Android opens the app. Otherwise S.browser_fallback_url
+  // takes over and Play Store opens.
+  // iOS — try the Universal Link once; if the user's still here after 1.5s the
+  // app isn't installed so we redirect to the App Store.
+  // Desktop — the link's default href is the Play Store, so the click just opens it.
   (function () {
     var btn = document.getElementById('open-app');
     if (!btn) return;
     var ua = navigator.userAgent || '';
     var isAndroid = /Android/i.test(ua);
-    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isIOS = /iPhone|iPad|iPod/i.test(ua) && !window.MSStream;
     btn.addEventListener('click', function (e) {
-      var storeUrl = isAndroid ? btn.dataset.android : isIOS ? btn.dataset.ios : null;
-      if (!storeUrl) return;
-      e.preventDefault();
-      var t = Date.now();
-      window.location.href = btn.href;
-      setTimeout(function () {
-        if (Date.now() - t < 1800) window.location.href = storeUrl;
-      }, 1500);
+      if (isAndroid) {
+        e.preventDefault();
+        var fallback = encodeURIComponent(btn.dataset.androidStore);
+        window.location.href = 'intent://' + btn.dataset.host + '/p/' + btn.dataset.token +
+          '#Intent;scheme=https;package=' + btn.dataset.androidPkg +
+          ';S.browser_fallback_url=' + fallback + ';end';
+      } else if (isIOS) {
+        e.preventDefault();
+        var t = Date.now();
+        window.location.href = btn.dataset.universalLink;
+        setTimeout(function () {
+          if (Date.now() - t < 1800) window.location.href = btn.dataset.iosStore;
+        }, 1500);
+      }
     });
   })();
 </script>
