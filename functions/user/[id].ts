@@ -417,6 +417,43 @@ const ICON_SCHOOL = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
 const ARROW_LEFT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
 const ARROW_RIGHT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
+// Religion chip icons — direct ports of the Android drawables in
+// productinfra/data/src/main/res/drawable/religion_*.xml. Mapping mirrors
+// Religion.kt exactly: Sunni/Shia/Alawism/Ismaili share the islam icon,
+// Yazidism + Non-religious + Other use the generic "other" icon. Fill is
+// currentColor so the chip's foreground colour drives the icon.
+const RELIGION_ISLAM_SVG = `<svg viewBox="0 0 71 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M15.88,35.93C15.88,19.29 29.37,5.8 46.01,5.8C50.92,5.8 55.55,6.98 59.65,9.07C53.39,3.62 45.21,0.3 36.26,0.3C16.58,0.3 0.63,16.25 0.63,35.93C0.63,55.61 16.58,71.56 36.26,71.56C45.22,71.56 53.39,68.25 59.65,62.79C55.55,64.87 50.92,66.06 46.01,66.06C29.37,66.06 15.88,52.57 15.88,35.93Z" fill="currentColor"/><path d="M70.65,32.81L62.06,32.63L59.24,24.52L56.41,32.63L47.82,32.81L54.67,38L52.18,46.22L59.24,41.31L66.29,46.22L63.8,38L70.65,32.81Z" fill="currentColor"/></svg>`;
+const RELIGION_CHRISTIANITY_SVG = `<svg viewBox="0 0 14 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7.923,0H5.445V20H7.923V0Z" fill="currentColor"/><path d="M13.06,7.559V5.082L0.305,5.082V7.559L13.06,7.559Z" fill="currentColor"/></svg>`;
+const RELIGION_JUDAISM_SVG = `<svg viewBox="0 0 71 81" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M35.67,80.81L0.77,20.36H70.57L35.67,80.81ZM11.16,26.36L35.67,68.81L60.18,26.36H11.16Z" fill="currentColor"/><path d="M70.57,60.58H0.76L35.66,0.13L70.56,60.58H70.57ZM11.16,54.58H60.18L35.67,12.13L11.16,54.58Z" fill="currentColor"/></svg>`;
+const RELIGION_DRUZE_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12,17.27L18.18,21l-1.64,-7.03L22,9.24l-7.19,-0.61L12,2 9.19,8.63 2,9.24l5.46,4.73L5.82,21z" fill="currentColor"/></svg>`;
+const RELIGION_HINDUISM_SVG = `<svg viewBox="0 0 75 76" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M46.315,0.171L40.05,6.436L46.315,12.701L52.58,6.436L46.315,0.171Z" fill="currentColor"/><path d="M46.32,22.19C59.26,25.46 68.93,15.48 68.93,15.48L61.95,8.5C61.95,8.5 55.19,15.79 46.32,15.79C37.45,15.79 32.35,4.77 32.35,4.77C32.35,4.77 29.77,18.01 46.32,22.19Z" fill="currentColor"/><path d="M74.35,45.03C73.82,25.9 59.95,22.23 51.88,27.1C44.26,31.7 43.24,43.42 34.78,44.71C32.29,42.51 30.04,41.56 30.04,41.56C30.04,41.56 39.73,35.25 36.97,25.38C34.21,15.51 21.15,10.8 6.22,20.36L12.49,30.89C12.49,30.89 18.76,23.89 25.76,24.09C32.76,24.29 37.36,38.76 17.96,37.16L22.29,47.83C22.29,47.83 32.89,46.21 34.49,54.81C36.29,64.48 21.27,71.56 10.94,63.57C0.61,55.57 1.7,44.57 1.7,44.57C1.7,44.57 -2.75,63.08 10.23,72.15C23.21,81.22 40.81,73.13 41.25,59.79C41.44,54.21 39.5,50.12 37.2,47.24H44.96C44.96,47.24 51.69,42.97 55.43,35.91C59.16,28.84 67.9,29.58 69.7,37.31C71.5,45.04 66.83,58.91 58.43,59.24C50.03,59.57 47.1,51.24 47.1,51.24V62.44C47.1,62.44 50.77,70.17 58.23,70.17C65.69,70.17 74.9,64.17 74.36,45.04L74.35,45.03Z" fill="currentColor"/></svg>`;
+const RELIGION_BUDDHISM_SVG = `<svg viewBox="0 0 86 85" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M43.67,74.68C26.03,74.68 11.68,60.33 11.68,42.69C11.68,25.05 26.03,10.7 43.67,10.7C61.31,10.7 75.66,25.05 75.66,42.69C75.66,60.33 61.31,74.68 43.67,74.68ZM43.67,16.69C29.34,16.69 17.68,28.35 17.68,42.68C17.68,57.01 29.34,68.67 43.67,68.67C58,68.67 69.66,57.01 69.66,42.68C69.66,28.35 58,16.69 43.67,16.69Z" fill="currentColor"/><path d="M43.67,56.73C35.92,56.73 29.62,50.43 29.62,42.68C29.62,34.93 35.92,28.63 43.67,28.63C51.42,28.63 57.72,34.93 57.72,42.68C57.72,50.43 51.42,56.73 43.67,56.73ZM43.67,34.64C39.23,34.64 35.62,38.25 35.62,42.69C35.62,47.13 39.23,50.74 43.67,50.74C48.11,50.74 51.72,47.13 51.72,42.69C51.72,38.25 48.11,34.64 43.67,34.64Z" fill="currentColor"/><path d="M46.67,6.01H40.67V31.64H46.67V6.01Z" fill="currentColor"/><path d="M43.67,11.1C46.58,11.1 48.94,8.741 48.94,5.83C48.94,2.92 46.58,0.56 43.67,0.56C40.759,0.56 38.4,2.92 38.4,5.83C38.4,8.741 40.759,11.1 43.67,11.1Z" fill="currentColor"/><path d="M46.67,53.73H40.67V79.36H46.67V53.73Z" fill="currentColor"/><path d="M43.67,84.81C46.58,84.81 48.94,82.451 48.94,79.54C48.94,76.63 46.58,74.27 43.67,74.27C40.759,74.27 38.4,76.63 38.4,79.54C38.4,82.451 40.759,84.81 43.67,84.81Z" fill="currentColor"/><path d="M80.35,39.68H54.72V45.68H80.35V39.68Z" fill="currentColor"/><path d="M80.53,47.95C83.44,47.95 85.8,45.591 85.8,42.68C85.8,39.77 83.44,37.41 80.53,37.41C77.619,37.41 75.26,39.77 75.26,42.68C75.26,45.591 77.619,47.95 80.53,47.95Z" fill="currentColor"/><path d="M32.63,39.68H7V45.68H32.63V39.68Z" fill="currentColor"/><path d="M12.024,43.548C12.49,40.675 10.539,37.968 7.666,37.502C4.793,37.036 2.086,38.987 1.62,41.86C1.154,44.732 3.105,47.44 5.978,47.906C8.85,48.372 11.557,46.421 12.024,43.548Z" fill="currentColor"/><path d="M67.483,14.628L49.36,32.751L53.603,36.993L71.726,18.87L67.483,14.628Z" fill="currentColor"/><path d="M73.46,20.35C71.4,22.41 68.07,22.41 66.01,20.35C63.95,18.29 63.95,14.96 66.01,12.9C68.07,10.84 71.4,10.84 73.46,12.9C75.52,14.96 75.52,18.29 73.46,20.35Z" fill="currentColor"/><path d="M33.75,48.38L15.627,66.504L19.87,70.746L37.993,52.623L33.75,48.38Z" fill="currentColor"/><path d="M22.881,69.127C23.077,66.223 20.882,63.71 17.978,63.514C15.074,63.318 12.561,65.513 12.365,68.418C12.169,71.321 14.365,73.834 17.268,74.03C20.173,74.226 22.685,72.031 22.881,69.127Z" fill="currentColor"/><path d="M53.607,48.355L49.365,52.598L67.488,70.721L71.73,66.479L53.607,48.355Z" fill="currentColor"/><path d="M66.01,72.47C63.95,70.41 63.95,67.08 66.01,65.02C68.07,62.96 71.4,62.96 73.46,65.02C75.52,67.08 75.52,70.41 73.46,72.47C71.4,74.53 68.07,74.53 66.01,72.47Z" fill="currentColor"/><path d="M19.865,14.633L15.622,18.875L33.745,36.998L37.988,32.756L19.865,14.633Z" fill="currentColor"/><path d="M22.872,16.732C22.94,13.823 20.635,11.409 17.725,11.342C14.816,11.275 12.402,13.58 12.335,16.49C12.268,19.399 14.573,21.813 17.483,21.88C20.392,21.947 22.805,19.642 22.872,16.732Z" fill="currentColor"/></svg>`;
+const RELIGION_SIKHISM_SVG = `<svg viewBox="0 0 71 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M55.25,14.91C55.25,14.91 61.98,22.61 63.34,32.37C64.71,42.12 60.32,50.41 45.49,59.67C42.99,61.23 40.69,62.67 38.57,64V58.98L44.71,52.84V51.92C52.1,48.49 57.24,41.02 57.24,32.36C57.24,23.01 51.25,15.05 42.91,12.06C43.87,9.63 44.71,8.46 44.71,8.46L35.67,0.68V0.66H35.66H35.65V0.68L26.61,8.46C26.61,8.46 27.45,9.62 28.41,12.06C20.09,15.05 14.1,23 14.1,32.35C14.1,41 19.23,48.46 26.61,51.9V52.83L32.75,58.97V63.99C30.63,62.66 28.33,61.22 25.83,59.66C11.01,50.4 6.62,42.11 7.98,32.36C9.35,22.61 16.07,14.9 16.07,14.9C-6.02,26.02 -0.7,45.62 8.95,57.12C18.6,68.63 18.12,70.09 18.12,70.09C23.58,62.87 28.34,64.24 28.34,64.24L32.75,67.09V67.65C28.15,70.54 24.98,72.55 23.45,73.51C22.79,73.93 22.39,74.66 22.39,75.44V77.06C22.39,78.33 23.42,79.35 24.68,79.35C25.94,79.35 26.97,78.32 26.97,77.06V74.57L32.75,70.84V77.69H31.77V79.66C31.77,81.8 33.51,83.54 35.65,83.54H35.67C37.81,83.54 39.55,81.8 39.55,79.66V77.69H38.57V70.84L44.35,74.57V77.06C44.35,78.33 45.38,79.35 46.64,79.35C47.9,79.35 48.93,78.32 48.93,77.06V75.44C48.93,74.65 48.53,73.93 47.87,73.51C46.34,72.54 43.18,70.54 38.57,67.65V67.09L42.98,64.24C42.98,64.24 47.74,62.87 53.2,70.09C53.2,70.09 52.71,68.63 62.37,57.12C72.02,45.61 77.34,26.01 55.25,14.9V14.91ZM53.3,32.36C53.3,38.77 49.85,44.37 44.72,47.46V47.09C44.72,47.09 40.19,42.8 40.19,28.76C40.19,23.29 40.88,19.02 41.72,15.83C48.47,18.3 53.31,24.77 53.31,32.37L53.3,32.36ZM18.05,32.36C18.05,24.77 22.88,18.31 29.62,15.83C30.46,19.02 31.15,23.29 31.15,28.75C31.15,42.79 26.62,47.08 26.62,47.08V47.44C21.5,44.35 18.06,38.75 18.06,32.36H18.05Z" fill="currentColor"/></svg>`;
+const RELIGION_BAHAI_SVG = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.476,20L10.002,17.117L6.529,20L5.693,15.525L1.207,15.467L3.4,11.494L0,8.521L4.196,6.909L3.473,2.414L7.709,3.916L10,0L12.291,3.916L16.527,2.414L15.804,6.909L20,8.521L16.6,11.494L18.793,15.467L14.307,15.525L13.471,20H13.476ZM10.002,15.18L12.488,17.244L13.085,14.042L16.295,14L14.725,11.157L17.158,9.03L14.157,7.877L14.673,4.66L11.642,5.736L10.002,2.933L8.363,5.736L5.332,4.66L5.848,7.877L2.847,9.03L5.28,11.157L3.709,14L6.92,14.042L7.517,17.244L10.002,15.18Z" fill="currentColor"/></svg>`;
+const RELIGION_OTHER_SVG = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.022,10.623C0.938,9.417 1.098,8.208 1.492,7.066C1.886,5.923 2.506,4.872 3.314,3.975C4.123,3.077 5.104,2.352 6.199,1.842C7.294,1.332 8.481,1.047 9.689,1.005C10.896,0.964 12.099,1.165 13.227,1.598C14.355,2.032 15.384,2.687 16.253,3.527C17.122,4.366 17.813,5.372 18.285,6.484C18.757,7.596 19,8.792 19,10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="10" r="2.727" fill="currentColor"/></svg>`;
+
+const RELIGION_ICON_BY_KEY: Record<string, string> = {
+  SUNNI_ISLAM: RELIGION_ISLAM_SVG,
+  SHIA_ISLAM: RELIGION_ISLAM_SVG,
+  ALAWISM: RELIGION_ISLAM_SVG,
+  ISMAILI: RELIGION_ISLAM_SVG,
+  CHRISTIANITY: RELIGION_CHRISTIANITY_SVG,
+  DRUZE: RELIGION_DRUZE_SVG,
+  JUDAISM: RELIGION_JUDAISM_SVG,
+  YAZIDISM: RELIGION_OTHER_SVG,
+  HINDUISM: RELIGION_HINDUISM_SVG,
+  BUDDHISM: RELIGION_BUDDHISM_SVG,
+  SIKHISM: RELIGION_SIKHISM_SVG,
+  BAHAI: RELIGION_BAHAI_SVG,
+  NON_RELIGIOUS: RELIGION_OTHER_SVG,
+  OTHER: RELIGION_OTHER_SVG,
+};
+
+function religionIconSvg(raw: string | null): string | null {
+  if (!raw) return null;
+  return RELIGION_ICON_BY_KEY[raw.trim().toUpperCase()] ?? null;
+}
+
 function notFound(host: string, lang: Lang): Response {
   const dir = dirFor(lang);
   const appName = APP_NAME_LOCALIZED[lang];
@@ -544,7 +581,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   // not country_code (where they currently live). ----
   const tags: string[] = [];
   const religion = religionLabel(p.religion, lang);
-  if (religion) tags.push(`<span class="chip chip--dark">${escapeHtml(religion)}</span>`);
+  if (religion) {
+    const rIcon = religionIconSvg(p.religion);
+    const rIconHtml = rIcon ? `<span class="icon">${rIcon}</span>` : "";
+    tags.push(`<span class="chip chip--dark">${rIconHtml}${escapeHtml(religion)}</span>`);
+  }
   const natLabel = nationalityLabel(p.nationality, lang);
   if (natLabel) {
     const flag = countryCodeToFlag(p.nationality);
