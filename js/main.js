@@ -144,11 +144,23 @@
     };
 
     // ——— Language Switcher ———
-    var currentLang = localStorage.getItem('janerek-lang') || 'ar';
+    // Initial language priority:
+    //   1. localStorage (explicit user choice from a prior visit)
+    //   2. <html lang> set by the Pages middleware (cookie / Accept-Language)
+    //   3. fallback 'ar'
+    var htmlLang = document.documentElement.getAttribute('lang');
+    var currentLang =
+        localStorage.getItem('janerek-lang') ||
+        (htmlLang === 'en' || htmlLang === 'ar' ? htmlLang : null) ||
+        'ar';
 
     function switchLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('janerek-lang', lang);
+        // Mirror to a cookie so server-rendered pages (the share-profile
+        // route, future SSR) see the same language without an extra round
+        // trip. 1-year max-age, lax same-site.
+        document.cookie = 'janerek-lang=' + lang + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; samesite=lax';
 
         var html = document.documentElement;
         html.setAttribute('lang', lang);

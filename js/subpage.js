@@ -216,11 +216,19 @@
         }
     };
 
-    var currentLang = localStorage.getItem('janerek-lang') || 'ar';
+    // Initial language priority: localStorage → <html lang> (set by Pages
+    // middleware from cookie / Accept-Language) → 'ar'.
+    var htmlLang = document.documentElement.getAttribute('lang');
+    var currentLang =
+        localStorage.getItem('janerek-lang') ||
+        (htmlLang === 'en' || htmlLang === 'ar' ? htmlLang : null) ||
+        'ar';
 
     function switchLanguage(lang) {
         currentLang = lang;
         localStorage.setItem('janerek-lang', lang);
+        // Mirror to cookie so server-rendered pages see the same language.
+        document.cookie = 'janerek-lang=' + lang + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; samesite=lax';
 
         var html = document.documentElement;
         html.setAttribute('lang', lang);

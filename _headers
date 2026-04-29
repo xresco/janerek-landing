@@ -6,5 +6,5 @@
 
 # Long cache for profile-photo proxy responses (also set per-response, but
 # this is a backstop in case a future renderer omits it).
-/p/*/img/*
+/user/*/img/*
   Cache-Control: public, max-age=86400, s-maxage=604800
