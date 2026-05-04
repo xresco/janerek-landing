@@ -1,3 +1,6 @@
 name = "janerek-landing"
 compatibility_date = "2026-05-03"
 pages_build_output_dir = "."
+
+[vars]
+SUPABASE_URL = "https://zwnluqyhpjfezjeudfaj.supabase.co"
