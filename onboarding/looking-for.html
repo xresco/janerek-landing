@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a class="nav-logo" href="/onboarding/photos.html">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card has-bottom-bar">
+            <div class="signup-header-row">
+                <div class="pink-circle" id="header-icon" aria-hidden="true"></div>
+                <div class="page-step-indicator" data-step="5" aria-label="Step 5 of 5"></div>
+            </div>
+
+            <h1 data-i18n="lf_title">ما الذي تبحث عنه؟</h1>
+            <p class="subtitle" data-i18n="lf_subtitle"></p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <div class="signup-field" id="field-lf">
+                <div class="chip-flex" id="lf-chips" role="radiogroup" style="margin-top:24px;"></div>
+                <div class="field-error" data-i18n="lf_required"></div>
+            </div>
+        </main>
+
+        <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+                <a href="/onboarding/photos.html" class="signup-btn outline" aria-label="Back" id="prev-btn"></a>
+                <button type="button" class="signup-btn primary" id="submit" data-i18n="lf_finish">ابدأ رحلتك</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            bootSignupPage, supabase, requireSession, t, currentLang,
+            showAlert, hideAlert, setLoading,
+            getCachedProfile, patchCachedProfile, fetchAndCacheProfile,
+        } from "/js/signup-shared.js";
+        import { LOOKING_FOR_LABELS } from "/js/onboarding-data.js";
+        import { HEADER_ICON, ICON_BACK } from "/js/onboarding-icons.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+        document.getElementById("header-icon").innerHTML = HEADER_ICON.lookingFor;
+        document.getElementById("prev-btn").innerHTML = ICON_BACK;
+
+        // Profile cache → instant prefill, no per-page DB roundtrip.
+        const cachedProfile = getCachedProfile();
+        const ready = (async () => {
+            const session = await requireSession();
+            const sb = await supabase();
+            if (!cachedProfile) await fetchAndCacheProfile();
+            return { session, sb };
+        })();
+
+        const fieldLf = document.getElementById("field-lf");
+        const chipHost = document.getElementById("lf-chips");
+        const alertEl = document.getElementById("alert");
+        const submitBtn = document.getElementById("submit");
+
+        let selected = null;
+
+        function render() {
+            const lang = currentLang();
+            const labels = LOOKING_FOR_LABELS[lang] || LOOKING_FOR_LABELS.en;
+            chipHost.innerHTML = [0, 1, 2].map((id) => {
+                const sel = id === selected ? " selected" : "";
+                return `<button type="button" class="chip${sel}" data-value="${id}" role="radio">
+                    <span>${labels[id]}</span>
+                </button>`;
+            }).join("");
+            chipHost.querySelectorAll(".chip").forEach((c) => {
+                c.addEventListener("click", () => {
+                    selected = parseInt(c.getAttribute("data-value"), 10);
+                    render();
+                    fieldLf.classList.remove("error");
+                });
+            });
+        }
+
+        if (cachedProfile?.looking_for != null) selected = cachedProfile.looking_for;
+
+        render();
+        window.addEventListener("janerek-lang-changed", render);
+
+        if (!cachedProfile) {
+            ready.then(() => {
+                const fresh = getCachedProfile();
+                if (fresh?.looking_for != null) {
+                    selected = fresh.looking_for;
+                    render();
+                }
+            });
+        }
+
+        submitBtn.addEventListener("click", async () => {
+            hideAlert(alertEl);
+            if (selected == null) {
+                fieldLf.classList.add("error");
+                return;
+            }
+            setLoading(submitBtn, true);
+            try {
+                const { sb, session } = await ready;
+                const patch = {
+                    looking_for: selected,
+                    is_profile_setup_complete: true,
+                };
+                const { error } = await sb
+                    .from("users")
+                    .update(patch)
+                    .eq("id", session.user.id);
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(submitBtn, false);
+                    return;
+                }
+                patchCachedProfile(patch);
+                window.location.href = "/welcome.html";
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — تم</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a href="/" class="nav-logo">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card">
+            <div class="welcome-hero">
+                <div class="checkmark">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <h1 data-i18n="welcome_title">تم التسجيل!</h1>
+                <p class="subtitle" data-i18n="welcome_subtitle">حمّل تطبيق جانرك لبدء التطابق.</p>
+            </div>
+
+            <p class="subtitle" id="hint" style="text-align:center;"></p>
+
+            <!-- Mobile: single open-app universal link button -->
+            <div class="signup-btn-stack" id="mobile-cta" style="display:none;">
+                <a class="signup-btn primary" id="open-app-btn">
+                    <span data-i18n="welcome_open_app">افتح التطبيق</span>
+                </a>
+            </div>
+
+            <!-- Desktop: QR + store badges -->
+            <div id="desktop-cta" style="display:none;">
+                <div class="qr-card">
+                    <div id="qr-img"></div>
+                    <p class="qr-hint" data-i18n="welcome_hint_desktop">امسح رمز QR بهاتفك، أو اختر متجرك بالأسفل.</p>
+                </div>
+                <!-- TODO: drop /assets/google-play-badge.png and
+                     /assets/app-store-badge.svg in to swap text buttons
+                     for the official store badges. -->
+                <div class="signup-btn-stack" style="margin-top:16px;">
+                    <a class="signup-btn outline" id="play-link-desktop" target="_blank" rel="noopener">
+                        <svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                        </svg>
+                        <span data-i18n="welcome_get_android">حمّل من Google Play</span>
+                    </a>
+                    <a class="signup-btn outline" id="ios-link-desktop" target="_blank" rel="noopener">
+                        <svg class="provider-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M17.05 12.04c-.03-2.6 2.13-3.86 2.23-3.92-1.21-1.78-3.1-2.02-3.77-2.05-1.6-.16-3.13.94-3.95.94-.83 0-2.08-.92-3.42-.9-1.76.03-3.39 1.02-4.3 2.6-1.84 3.18-.47 7.89 1.31 10.47.87 1.27 1.91 2.69 3.27 2.64 1.32-.05 1.81-.85 3.4-.85s2.04.85 3.42.82c1.42-.03 2.31-1.29 3.18-2.57 1-1.47 1.41-2.9 1.43-2.97-.03-.01-2.74-1.05-2.79-4.21zM14.51 4.34c.72-.87 1.21-2.08 1.07-3.29-1.04.04-2.3.69-3.05 1.56-.67.77-1.27 2.01-1.11 3.19 1.16.09 2.36-.59 3.09-1.46z"/>
+                        </svg>
+                        <span data-i18n="welcome_get_ios">حمّل من App Store</span>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { bootSignupPage, t, currentLang } from "/js/signup-shared.js";
+
+        bootSignupPage({ title: { ar: "جانرك — تم", en: "Janerek — Done" } });
+
+        const PLAY_URL = "https://play.google.com/store/apps/details?id=com.janerek";
+        const APPSTORE_URL = "https://apps.apple.com/app/id6747498822"; // TODO: confirm App Store ID
+        const UNIVERSAL_LINK = "https://janerek.com/open"; // mobile universal-link target; falls through to install
+        const SHARE_HOST = "janerek.com";
+
+        // ===== UA detection =====
+        const ua = navigator.userAgent || "";
+        const isIOS = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+        const isAndroid = /Android/.test(ua);
+        const isMobile = isIOS || isAndroid;
+
+        const hint = document.getElementById("hint");
+        function paintHint() {
+            hint.textContent = isMobile ? t("welcome_hint_mobile") : t("welcome_hint_desktop");
+        }
+        paintHint();
+        window.addEventListener("janerek-lang-changed", paintHint);
+
+        if (isMobile) {
+            document.getElementById("mobile-cta").style.display = "flex";
+            const btn = document.getElementById("open-app-btn");
+            // The universal link opens the app if installed; if not, the
+            // visitor is redirected to the relevant store after a short
+            // moment.
+            btn.href = UNIVERSAL_LINK;
+            btn.addEventListener("click", () => {
+                // Fallback: if the app didn't open within 1.5s, send them
+                // to the store directly. Browsers vary in how strict they
+                // are about this, but this is a common pattern.
+                setTimeout(() => {
+                    if (document.visibilityState === "visible") {
+                        window.location.href = isIOS ? APPSTORE_URL : PLAY_URL;
+                    }
+                }, 1500);
+            });
+        } else {
+            document.getElementById("desktop-cta").style.display = "block";
+            document.getElementById("play-link-desktop").href = PLAY_URL;
+            document.getElementById("ios-link-desktop").href = APPSTORE_URL;
+
+            // QR rendered client-side so we don't need a Pages Function
+            // for it. Falls through to plain store buttons if the lib
+            // can't load (offline / blocked).
+            try {
+                const QRCode = (await import("https://esm.sh/qrcode@1.5.4")).default;
+                const url = `https://${SHARE_HOST}/welcome.html?from=qr`;
+                const dataUrl = await QRCode.toDataURL(url, {
+                    margin: 1,
+                    width: 360,
+                    color: { dark: "#1F2937", light: "#FFFFFF" },
+                });
+                const img = document.createElement("img");
+                img.src = dataUrl;
+                img.alt = "QR";
+                document.getElementById("qr-img").appendChild(img);
+            } catch (err) {
+                document.querySelector(".qr-card").style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a href="/signup/" class="nav-logo">
+                <span data-i18n="nav_back">رجوع</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card">
+            <div class="welcome-hero">
+                <div class="checkmark">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                </div>
+                <h1 data-i18n="email_sent_title">تحقّق من بريدك</h1>
+                <p class="subtitle" id="subtitle"></p>
+            </div>
+
+            <div class="signup-alert info" id="alert" style="display:none;"></div>
+
+            <div class="signup-btn-stack">
+                <button type="button" class="signup-btn outline" id="resend" data-i18n="email_sent_resend">إعادة الإرسال</button>
+                <a href="/signup/email.html" class="signup-btn ghost" data-i18n="email_sent_change">استخدم بريدًا آخر</a>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { bootSignupPage, supabase, t, showAlert, setLoading } from "/js/signup-shared.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get("email") || "";
+        const subtitle = document.getElementById("subtitle");
+
+        function paint() {
+            subtitle.textContent = t("email_sent_subtitle", { email });
+        }
+        paint();
+        window.addEventListener("janerek-lang-changed", paint);
+
+        const resendBtn = document.getElementById("resend");
+        const alertEl = document.getElementById("alert");
+        let lastSent = Date.now();
+
+        resendBtn.addEventListener("click", async () => {
+            // Cheap rate-limit so people don't spam the resend button.
+            if (Date.now() - lastSent < 30000) {
+                showAlert(alertEl, "info", t("email_sent_resend_wait"));
+                return;
+            }
+            setLoading(resendBtn, true);
+            try {
+                const sb = await supabase();
+                const { error } = await sb.auth.signInWithOtp({
+                    email,
+                    options: { emailRedirectTo: `${window.location.origin}/auth/callback.html` },
+                });
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                } else {
+                    lastSent = Date.now();
+                    showAlert(alertEl, "success", t("email_sent_resent"));
+                }
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+            } finally {
+                setLoading(resendBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

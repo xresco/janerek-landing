@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a class="nav-logo" href="/onboarding/background.html">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card has-bottom-bar">
+            <div class="signup-header-row">
+                <div class="pink-circle" id="header-icon" aria-hidden="true"></div>
+                <div class="page-step-indicator" data-step="3" aria-label="Step 3 of 5"></div>
+            </div>
+
+            <h1 data-i18n="story_title">قصتك</h1>
+            <p class="subtitle" data-i18n="story_subtitle"></p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <!-- Profession (single, opens modal) -->
+            <span class="section-label first" data-i18n="story_section_profession">مهنتك</span>
+            <div class="signup-field" id="field-profession">
+                <div class="chip-flex" id="profession-chips"></div>
+                <div class="field-error" data-i18n="story_err_profession"></div>
+            </div>
+
+            <!-- Profession extra: shown for STUDENT/OTHER -->
+            <div id="profession-extra-wrap" style="display:none;">
+                <span class="section-label" id="profession-extra-label"></span>
+                <div class="signup-field" id="field-profession-extra">
+                    <input type="text" id="profession-extra" maxlength="40">
+                    <div class="field-error" id="profession-extra-error"></div>
+                </div>
+            </div>
+
+            <!-- Education (single, opens modal) -->
+            <span class="section-label" data-i18n="story_section_education">تحصيلك العلمي</span>
+            <div class="signup-field" id="field-education">
+                <div class="chip-flex" id="education-chips"></div>
+                <div class="field-error" data-i18n="story_err_education"></div>
+            </div>
+
+            <!-- Bio (free-text, ≥8 words required) -->
+            <span class="section-label" data-i18n="story_section_bio">عنك</span>
+            <div class="signup-field" id="field-bio">
+                <textarea id="bio" rows="6"
+                          data-i18n-placeholder="story_bio_placeholder"
+                          placeholder="أخبرنا عن نفسك"></textarea>
+                <div class="field-error" data-i18n="story_err_bio_invalid"></div>
+            </div>
+        </main>
+
+        <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+                <a href="/onboarding/background.html" class="signup-btn outline" aria-label="Back" id="prev-btn"></a>
+                <button type="button" class="signup-btn primary" id="submit" data-i18n="ob_continue">التالي</button>
+            </div>
+        </div>
+
+        <div id="modal-host"></div>
+    </div>
+
+    <script type="module">
+        import {
+            bootSignupPage, supabase, requireSession, t, currentLang,
+            showAlert, hideAlert, setLoading, isValidBio, sanitizeBio,
+            getCachedProfile, patchCachedProfile, fetchAndCacheProfile,
+        } from "/js/signup-shared.js";
+        import {
+            PROFESSIONS, PROFESSION_LABELS,
+            EDUCATIONS, EDUCATION_LABELS,
+        } from "/js/onboarding-data.js";
+        import { HEADER_ICON, ICON_BACK } from "/js/onboarding-icons.js";
+        import { openSelectionModal } from "/js/onboarding-modal.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+        document.getElementById("header-icon").innerHTML = HEADER_ICON.story;
+        document.getElementById("prev-btn").innerHTML = ICON_BACK;
+
+        // Profile cache → instant prefill, no per-page DB roundtrip.
+        const cachedProfile = getCachedProfile();
+        const ready = (async () => {
+            const session = await requireSession();
+            const sb = await supabase();
+            if (!cachedProfile) await fetchAndCacheProfile();
+            return { session, sb };
+        })();
+
+        const fieldProfession = document.getElementById("field-profession");
+        const fieldProfessionExtra = document.getElementById("field-profession-extra");
+        const fieldEducation = document.getElementById("field-education");
+        const fieldBio = document.getElementById("field-bio");
+        const alertEl = document.getElementById("alert");
+        const submitBtn = document.getElementById("submit");
+
+        // ===== State =====
+        let profession = null;          // { id, key }
+        let professionExtra = "";       // free text for STUDENT or OTHER
+        let education = null;           // { id, key }
+        let bioValue = "";
+
+        const professionExtraWrap = document.getElementById("profession-extra-wrap");
+        const professionExtraLabel = document.getElementById("profession-extra-label");
+        const professionExtraInput = document.getElementById("profession-extra");
+        const professionExtraError = document.getElementById("profession-extra-error");
+        const bioInput = document.getElementById("bio");
+
+        // ===== Profession chip (single, insertion-style) =====
+        const professionHost = document.getElementById("profession-chips");
+        function renderProfession() {
+            const lang = currentLang();
+            const labels = PROFESSION_LABELS[lang] || PROFESSION_LABELS.en;
+            let html = "";
+            if (profession) {
+                html += `<span class="chip selected">
+                    <span>${labels[profession.key] || profession.key}</span>
+                    <button type="button" class="chip-remove" id="profession-clear" aria-label="remove">×</button>
+                </span>`;
+            }
+            html += `<button type="button" class="chip add" id="profession-add">
+                <span>+</span>
+                <span>${t("story_pick_profession")}</span>
+            </button>`;
+            professionHost.innerHTML = html;
+            const clear = document.getElementById("profession-clear");
+            if (clear) {
+                clear.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    profession = null;
+                    professionExtra = "";
+                    renderProfession();
+                    syncProfessionExtra();
+                });
+            }
+            document.getElementById("profession-add").addEventListener("click", openProfessionModal);
+        }
+
+        function syncProfessionExtra() {
+            // STUDENT (id 0) → "where you study"
+            // OTHER   (id 13) → "what you do"
+            // Anything else → hide.
+            if (!profession) {
+                professionExtraWrap.style.display = "none";
+                professionExtraInput.value = "";
+                return;
+            }
+            if (profession.id === 0) {
+                professionExtraLabel.textContent = t("story_profession_student_label");
+                professionExtraInput.placeholder = t("story_profession_student_placeholder");
+                professionExtraWrap.style.display = "block";
+                professionExtraInput.value = professionExtra;
+            } else if (profession.id === 13) {
+                professionExtraLabel.textContent = t("story_profession_extra_label");
+                professionExtraInput.placeholder = t("story_profession_extra_placeholder");
+                professionExtraWrap.style.display = "block";
+                professionExtraInput.value = professionExtra;
+            } else {
+                professionExtraWrap.style.display = "none";
+                professionExtraInput.value = "";
+            }
+        }
+
+        function openProfessionModal() {
+            const lang = currentLang();
+            const labels = PROFESSION_LABELS[lang] || PROFESSION_LABELS.en;
+            const items = PROFESSIONS.map((p) => ({
+                value: String(p.id),
+                label: labels[p.key] || p.key,
+            }));
+            openSelectionModal({
+                host: document.getElementById("modal-host"),
+                title: t("story_section_profession"),
+                items,
+                multi: false,
+                initial: profession ? [String(profession.id)] : [],
+                searchPlaceholder: t("bg_dialog_search"),
+                onDone: (sel) => {
+                    const id = parseInt(sel[0], 10);
+                    profession = PROFESSIONS.find((p) => p.id === id) || null;
+                    if (!profession || (profession.id !== 0 && profession.id !== 13)) {
+                        professionExtra = "";
+                    }
+                    renderProfession();
+                    syncProfessionExtra();
+                    fieldProfession.classList.remove("error");
+                },
+            });
+        }
+
+        // ===== Education chip (single) =====
+        const educationHost = document.getElementById("education-chips");
+        function renderEducation() {
+            const lang = currentLang();
+            const labels = EDUCATION_LABELS[lang] || EDUCATION_LABELS.en;
+            let html = "";
+            if (education) {
+                html += `<span class="chip selected">
+                    <span>${labels[education.key] || education.key}</span>
+                    <button type="button" class="chip-remove" id="education-clear" aria-label="remove">×</button>
+                </span>`;
+            }
+            html += `<button type="button" class="chip add" id="education-add">
+                <span>+</span>
+                <span>${t("story_pick_education")}</span>
+            </button>`;
+            educationHost.innerHTML = html;
+            const clear = document.getElementById("education-clear");
+            if (clear) {
+                clear.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    education = null;
+                    educationExtra = "";
+                    renderEducation();
+                    syncEducationExtra();
+                });
+            }
+            document.getElementById("education-add").addEventListener("click", openEducationModal);
+        }
+
+        function openEducationModal() {
+            const lang = currentLang();
+            const labels = EDUCATION_LABELS[lang] || EDUCATION_LABELS.en;
+            const items = EDUCATIONS.map((e) => ({
+                value: String(e.id),
+                label: labels[e.key] || e.key,
+            }));
+            openSelectionModal({
+                host: document.getElementById("modal-host"),
+                title: t("story_section_education"),
+                items,
+                multi: false,
+                initial: education ? [String(education.id)] : [],
+                searchPlaceholder: t("bg_dialog_search"),
+                onDone: (sel) => {
+                    const id = parseInt(sel[0], 10);
+                    education = EDUCATIONS.find((e) => e.id === id) || null;
+                    renderEducation();
+                    fieldEducation.classList.remove("error");
+                },
+            });
+        }
+
+        professionExtraInput.addEventListener("input", () => {
+            professionExtra = professionExtraInput.value;
+            fieldProfessionExtra.classList.remove("error");
+        });
+        bioInput.addEventListener("input", () => {
+            bioValue = bioInput.value;
+            fieldBio.classList.remove("error");
+        });
+
+        function applyPrefill(row) {
+            if (!row) return;
+            if (row.profession_id != null) {
+                profession = PROFESSIONS.find((p) => p.id === row.profession_id) || null;
+                if (profession && (profession.id === 0 || profession.id === 13)) {
+                    professionExtra = row.profession || "";
+                }
+            }
+            if (row.education_id != null) {
+                education = EDUCATIONS.find((e) => e.id === row.education_id) || null;
+            }
+            if (row.bio) {
+                bioValue = row.bio;
+                bioInput.value = bioValue;
+            }
+        }
+        applyPrefill(cachedProfile);
+
+        renderProfession();
+        renderEducation();
+        syncProfessionExtra();
+
+        window.addEventListener("janerek-lang-changed", () => {
+            renderProfession();
+            renderEducation();
+            syncProfessionExtra();
+        });
+
+        if (!cachedProfile) {
+            ready.then(() => {
+                applyPrefill(getCachedProfile());
+                renderProfession();
+                renderEducation();
+                syncProfessionExtra();
+            });
+        }
+
+        // ===== Submit =====
+        submitBtn.addEventListener("click", async () => {
+            hideAlert(alertEl);
+            fieldProfession.classList.remove("error");
+            fieldEducation.classList.remove("error");
+            fieldProfessionExtra.classList.remove("error");
+            fieldBio.classList.remove("error");
+
+            if (!profession) {
+                fieldProfession.classList.add("error");
+                return;
+            }
+            // STUDENT/OTHER need an extra value (Android requires a non-empty string).
+            if ((profession.id === 0 || profession.id === 13) && !professionExtra.trim()) {
+                fieldProfessionExtra.classList.add("error");
+                professionExtraError.textContent = profession.id === 0
+                    ? t("story_err_university_invalid")
+                    : t("story_err_profession_invalid");
+                return;
+            }
+            if (!education) {
+                fieldEducation.classList.add("error");
+                return;
+            }
+            if (!isValidBio(bioValue)) {
+                fieldBio.classList.add("error");
+                bioInput.focus();
+                return;
+            }
+
+            setLoading(submitBtn, true);
+            try {
+                const { sb, session } = await ready;
+                const payload = {
+                    profession_id: profession.id,
+                    profession: (profession.id === 0 || profession.id === 13)
+                        ? professionExtra.trim()
+                        : null,
+                    education_id: education.id,
+                    bio: sanitizeBio(bioValue),
+                };
+                const { error } = await sb
+                    .from("users")
+                    .update(payload)
+                    .eq("id", session.user.id);
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(submitBtn, false);
+                    return;
+                }
+                patchCachedProfile(payload);
+                window.location.href = "/onboarding/photos.html";
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

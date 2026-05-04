@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a href="/signup/" class="nav-logo">
+                <span data-i18n="nav_back">رجوع</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card">
+            <h1 data-i18n="email_title">المتابعة بالبريد الإلكتروني</h1>
+            <p class="subtitle" data-i18n="email_subtitle">سنرسل لك رابطًا سحريًا — لا حاجة لكلمة مرور.</p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <form id="form" novalidate>
+                <div class="signup-field" id="field-email">
+                    <label for="email" data-i18n="email_label_email">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required>
+                    <div class="field-error"></div>
+                </div>
+
+                <button type="submit" class="signup-btn primary" id="submit" data-i18n="email_submit">أرسل لي الرابط</button>
+            </form>
+        </main>
+    </div>
+
+    <script type="module">
+        import { bootSignupPage, supabase, t, showAlert, hideAlert, setLoading } from "/js/signup-shared.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+
+        const form = document.getElementById("form");
+        const submitBtn = document.getElementById("submit");
+        const alertEl = document.getElementById("alert");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            hideAlert(alertEl);
+
+            const email = document.getElementById("email").value.trim();
+            const emailField = document.getElementById("field-email");
+            emailField.classList.toggle("error", !email);
+            if (!email) return;
+
+            setLoading(submitBtn, true);
+            try {
+                const sb = await supabase();
+                // Magic link / OTP flow — Supabase emails the user a link
+                // that lands on /auth/callback.html?code=…. shouldCreateUser
+                // is true by default, so first-time visitors get an account
+                // automatically when they click through.
+                const { error } = await sb.auth.signInWithOtp({
+                    email,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+                    },
+                });
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(submitBtn, false);
+                    return;
+                }
+                const url = new URL("/signup/email-sent.html", window.location.origin);
+                url.searchParams.set("email", email);
+                window.location.replace(url.toString());
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

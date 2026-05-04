@@ -12,11 +12,17 @@
             nav_screenshots: 'صور التطبيق',
             nav_faq: 'الأسئلة الشائعة',
             nav_download: 'حمّل التطبيق',
+            nav_signup: 'سجّل الآن',
+            nav_continue: 'أكمل ملفك الشخصي',
+            nav_sign_out: 'تسجيل الخروج',
             hero_title: 'جانرك',
             hero_tagline: 'ابدأ قصة زواجك من هنا',
             hero_subtitle: 'تطبيق تعارف للزواج — ابحث عن شريك يناسب قيمك وثقافتك. جانِرك مصمم للأشخاص الذين يعرفون ما يريدون: شريك حياة حقيقي.',
             hero_cta: 'حمّل من Google Play',
             scroll_text: 'استكشف المزيد',
+            band_title: 'لست مستعدًا للتحميل؟',
+            band_subtitle: 'أنشئ ملفك الشخصي على الويب في دقيقتين، ثم حمّل التطبيق وتابع من حيث توقفت.',
+            band_cta: 'سجّل مجانًا',
             features_title: 'ما الذي يميز جانِرك؟',
             features_subtitle: 'تطبيق مصمم للباحثين عن شريك حياة — وليس مجرد تمرير عشوائي.',
             feature1_title: 'نية واضحة للزواج',
@@ -80,11 +86,17 @@
             nav_screenshots: 'Screenshots',
             nav_faq: 'FAQ',
             nav_download: 'Download',
+            nav_signup: 'Sign up',
+            nav_continue: 'Complete your profile',
+            nav_sign_out: 'Sign out',
             hero_title: 'Janerek',
             hero_tagline: 'Dating for Marriage',
             hero_subtitle: 'Marriage-first dating. Find your future spouse based on values and culture. This isn\'t endless swiping. This is intentional connection.',
             hero_cta: 'Get it on Google Play',
             scroll_text: 'Scroll to explore',
+            band_title: 'Not ready to download yet?',
+            band_subtitle: 'Create your profile online in two minutes — install the app whenever you\'re ready and pick up right where you left off.',
+            band_cta: 'Sign up free',
             features_title: 'Why Janerek?',
             features_subtitle: 'A dating app built for marriage, not just swiping.',
             feature1_title: 'Designed for Marriage',
@@ -231,6 +243,96 @@
 
     // Initialize language
     switchLanguage(currentLang);
+
+    // ——— Session-aware CTAs ———
+    // The home page is a static asset, but Supabase persists its session
+    // in localStorage under `sb-{project-ref}-auth-token`. Peek at that
+    // (no need to load supabase-js here) so the nav CTA can say
+    // "Continue" instead of "Sign up" when the visitor is already signed
+    // in, and we can offer a "Sign out" affordance to clear stale state.
+    function hasActiveSupabaseSession() {
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (!k || !/^sb-.*-auth-token$/.test(k)) continue;
+                var raw = localStorage.getItem(k);
+                if (!raw) continue;
+                var s = JSON.parse(raw);
+                // Supabase wraps payloads either as { currentSession: {...} }
+                // (older SDK) or directly as the session object (newer).
+                var sess = (s && s.currentSession) || s;
+                var exp = sess && sess.expires_at;
+                if (typeof exp !== 'number') continue;
+                if (exp * 1000 > Date.now()) return true;
+            }
+        } catch (_) { /* ignore parse / quota errors */ }
+        return false;
+    }
+
+    function clearSupabaseSession() {
+        try {
+            var keys = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && /^sb-.*-auth-token$/.test(k)) keys.push(k);
+            }
+            keys.forEach(function (k) { localStorage.removeItem(k); });
+            sessionStorage.removeItem('janerek-profile');
+            sessionStorage.removeItem('janerek-signup-state');
+        } catch (_) { /* ignore */ }
+    }
+
+    function applySessionAwareCtas() {
+        var loggedIn = hasActiveSupabaseSession();
+        // Nav CTA: "Sign up" → "Continue"
+        document.querySelectorAll('.nav-cta[href="/signup/"]').forEach(function (el) {
+            el.setAttribute('data-i18n', loggedIn ? 'nav_continue' : 'nav_signup');
+        });
+        // Big band CTA mid-page
+        document.querySelectorAll('.signup-band-cta [data-i18n="band_cta"]').forEach(function (el) {
+            el.setAttribute('data-i18n', loggedIn ? 'nav_continue' : 'band_cta');
+        });
+        // Inject / remove a Sign out link next to the nav CTA.
+        var navList = document.getElementById('navLinks');
+        var existing = document.getElementById('navSignOut');
+        if (loggedIn && navList && !existing) {
+            var li = document.createElement('li');
+            li.id = 'navSignOut';
+            var a = document.createElement('a');
+            a.href = '#';
+            a.setAttribute('data-i18n', 'nav_sign_out');
+            a.textContent = translations[currentLang].nav_sign_out;
+            a.style.opacity = '0.75';
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                clearSupabaseSession();
+                window.location.reload();
+            });
+            li.appendChild(a);
+            // Insert after the CTA <li>.
+            var ctaLi = navList.querySelector('.nav-cta');
+            if (ctaLi && ctaLi.parentNode) {
+                navList.insertBefore(li, ctaLi.parentNode.nextSibling);
+            } else {
+                navList.appendChild(li);
+            }
+        } else if (!loggedIn && existing) {
+            existing.remove();
+        }
+        // Re-run translation so the swapped data-i18n keys take effect.
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+            var key = el.getAttribute('data-i18n');
+            if (translations[currentLang] && translations[currentLang][key]) {
+                el.textContent = translations[currentLang][key];
+            }
+        });
+    }
+
+    applySessionAwareCtas();
+    // Re-evaluate when the user toggles language (so the new sign-out
+    // link gets translated) or when they come back to the tab.
+    window.addEventListener('langChanged', applySessionAwareCtas);
+    window.addEventListener('focus', applySessionAwareCtas);
 
     // ——— Mobile Navigation Toggle ———
     var navToggle = document.getElementById('navToggle');

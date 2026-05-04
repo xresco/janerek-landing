@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <!-- Synchronous session peek: if a non-expired Supabase session
+         exists in localStorage, hide the chooser and show a spinner so
+         the user doesn't see the login screen flash before the async
+         redirect to the next onboarding step kicks in. -->
+    <script>
+        (function () {
+            try {
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (!k || !/^sb-.*-auth-token$/.test(k)) continue;
+                    var raw = localStorage.getItem(k);
+                    if (!raw) continue;
+                    var s = JSON.parse(raw);
+                    var sess = (s && s.currentSession) || s;
+                    var exp = sess && sess.expires_at;
+                    if (typeof exp !== 'number') continue;
+                    if (exp * 1000 > Date.now()) {
+                        document.documentElement.classList.add('has-session');
+                        return;
+                    }
+                }
+            } catch (_) { /* ignore */ }
+        })();
+    </script>
+    <div class="page-loader" id="pageLoader" aria-hidden="true">
+        <span class="page-loader-spinner"></span>
+    </div>
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a href="/" class="nav-logo">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                    <path d="M232.58,144.81C264.57,161.01 286.49,194.2 286.49,232.5C286.49,270.81 264.57,303.99 232.58,320.19C200.6,303.99 178.67,270.81 178.67,232.5C178.67,194.2 200.6,161.01 232.58,144.81Z" fill="#ffffff"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card">
+            <h1 data-i18n="chooser_title">أنشئ حسابك</h1>
+            <p class="subtitle" data-i18n="chooser_subtitle">ابحث عن شريك جاد للزواج يشاركك قيمك.</p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <div class="signup-btn-stack">
+                <button type="button" class="signup-btn outline" data-provider="google">
+                    <svg class="provider-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC04" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+                    </svg>
+                    <span data-i18n="chooser_continue_google">المتابعة باستخدام Google</span>
+                </button>
+
+                <button type="button" class="signup-btn outline" data-provider="apple">
+                    <svg class="provider-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#000" d="M17.05 12.04c-.03-2.6 2.13-3.86 2.23-3.92-1.21-1.78-3.1-2.02-3.77-2.05-1.6-.16-3.13.94-3.95.94-.83 0-2.08-.92-3.42-.9-1.76.03-3.39 1.02-4.3 2.6-1.84 3.18-.47 7.89 1.31 10.47.87 1.27 1.91 2.69 3.27 2.64 1.32-.05 1.81-.85 3.4-.85s2.04.85 3.42.82c1.42-.03 2.31-1.29 3.18-2.57 1-1.47 1.41-2.9 1.43-2.97-.03-.01-2.74-1.05-2.79-4.21zM14.51 4.34c.72-.87 1.21-2.08 1.07-3.29-1.04.04-2.3.69-3.05 1.56-.67.77-1.27 2.01-1.11 3.19 1.16.09 2.36-.59 3.09-1.46z"/>
+                    </svg>
+                    <span data-i18n="chooser_continue_apple">المتابعة باستخدام Apple</span>
+                </button>
+            </div>
+
+            <div class="signup-divider"><span data-i18n="chooser_or">أو</span></div>
+
+            <a href="/signup/email.html" class="signup-btn primary" data-i18n="chooser_continue_email">المتابعة بالبريد الإلكتروني</a>
+
+            <p class="subtitle" style="margin-top:24px; font-size:0.85rem; text-align:center;">
+                <span data-i18n="chooser_terms">بالاستمرار فإنك توافق على</span>
+                <a href="/terms.html" data-i18n="chooser_terms_link" style="color:var(--color-primary);">الشروط</a>
+                <span data-i18n="chooser_terms_and">و</span>
+                <a href="/privacy.html" data-i18n="chooser_privacy_link" style="color:var(--color-primary);">سياسة الخصوصية</a>.
+            </p>
+        </main>
+    </div>
+
+    <script type="module">
+        import { bootSignupPage, supabase, t, showAlert, setLoading } from "/js/signup-shared.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+
+        const alertEl = document.getElementById("alert");
+
+        // OAuth — uses Supabase's built-in OAuth flow. The callback
+        // route (/auth/callback.html) handles the code exchange.
+        async function signInWith(btn, provider) {
+            hideAlert();
+            // The browser is about to navigate to the provider's consent
+            // screen — show a loading state on the button so the user
+            // gets immediate feedback while supabase-js initializes and
+            // builds the OAuth URL.
+            setLoading(btn, true);
+            // Disable the other provider buttons too — clicking them
+            // mid-redirect would race.
+            document.querySelectorAll("[data-provider]").forEach((b) => {
+                if (b !== btn) b.disabled = true;
+            });
+            try {
+                const sb = await supabase();
+                const { error } = await sb.auth.signInWithOAuth({
+                    provider,
+                    options: {
+                        redirectTo: `${window.location.origin}/auth/callback.html`,
+                    },
+                });
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(btn, false);
+                    document.querySelectorAll("[data-provider]").forEach((b) => {
+                        b.disabled = false;
+                    });
+                }
+                // On success the browser navigates away — no need to
+                // reset the button state.
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(btn, false);
+                document.querySelectorAll("[data-provider]").forEach((b) => {
+                    b.disabled = false;
+                });
+            }
+        }
+
+        function hideAlert() {
+            if (alertEl) alertEl.style.display = "none";
+        }
+
+        document.querySelectorAll("[data-provider]").forEach((btn) => {
+            btn.addEventListener("click", () => signInWith(btn, btn.dataset.provider));
+        });
+
+        // Hide the page loader once we've confirmed we're staying on
+        // this screen (no session). If we have a session, the loader
+        // stays visible until the redirect resolves.
+        const hasSession = document.documentElement.classList.contains("has-session");
+        if (!hasSession) {
+            document.getElementById("pageLoader").style.display = "none";
+        }
+
+        // If the visitor already has a live session, skip the chooser
+        // and route them to the next step (or /welcome).
+        (async () => {
+            const sb = await supabase();
+            const { data } = await sb.auth.getSession();
+            if (data.session) {
+                const { nextOnboardingStep } = await import("/js/signup-shared.js");
+                window.location.replace(await nextOnboardingStep());
+            } else if (hasSession) {
+                // Synchronous peek said yes, but Supabase says no —
+                // localStorage was stale. Drop the loader and reveal
+                // the chooser.
+                document.documentElement.classList.remove("has-session");
+                document.getElementById("pageLoader").style.display = "none";
+            }
+        })();
+    </script>
+</body>
+</html>

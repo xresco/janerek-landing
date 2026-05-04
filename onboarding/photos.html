@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a class="nav-logo" href="/onboarding/story.html">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card has-bottom-bar">
+            <div class="signup-header-row">
+                <div class="pink-circle" id="header-icon" aria-hidden="true"></div>
+                <div class="page-step-indicator" data-step="4" aria-label="Step 4 of 5"></div>
+            </div>
+
+            <h1 data-i18n="photos_title">أظهر ابتسامتك</h1>
+            <p class="subtitle" data-i18n="photos_subtitle"></p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <div class="photo-grid" id="photo-grid"></div>
+
+            <input type="file" id="file" accept="image/*" hidden>
+        </main>
+
+        <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+                <a href="/onboarding/story.html" class="signup-btn outline" aria-label="Back" id="prev-btn"></a>
+                <button type="button" class="signup-btn primary" id="submit" data-i18n="ob_continue">التالي</button>
+            </div>
+        </div>
+
+        <!-- Edit-photo bottom sheet host -->
+        <div id="photo-menu-host"></div>
+
+        <!-- Crop overlay (shown when a file is picked) -->
+        <div id="crop-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:60; display:none; align-items:center; justify-content:center; padding:16px;">
+            <div style="background:#fff; border-radius:20px; max-width:480px; width:100%; padding:16px;">
+                <h2 style="font-size:1.05rem; margin-bottom:6px;" data-i18n="photo_crop_title">حدّد موضع الصورة</h2>
+                <p class="subtitle" style="margin-bottom:12px;" data-i18n="photo_crop_subtitle"></p>
+                <div class="cropper-shell" style="aspect-ratio:1/1;">
+                    <img id="cropper-img" alt="">
+                </div>
+                <div class="signup-btn-row">
+                    <button type="button" class="signup-btn outline" id="cancel-crop" data-i18n="photo_crop_cancel">إلغاء</button>
+                    <button type="button" class="signup-btn primary" id="save-crop" data-i18n="photo_crop_save">استخدم هذه الصورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <script type="module">
+        import {
+            bootSignupPage, supabase, requireSession, t,
+            showAlert, hideAlert, setLoading,
+            getCachedProfile, patchCachedProfile, fetchAndCacheProfile,
+        } from "/js/signup-shared.js";
+        import { HEADER_ICON, ICON_BACK, ICON_EDIT } from "/js/onboarding-icons.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+        document.getElementById("header-icon").innerHTML = HEADER_ICON.photos;
+        document.getElementById("prev-btn").innerHTML = ICON_BACK;
+
+        const TOTAL_SLOTS = 6;
+
+        // Profile cache → instant prefill, no per-page DB roundtrip.
+        const cachedProfile = getCachedProfile();
+        const ready = (async () => {
+            const session = await requireSession();
+            const sb = await supabase();
+            if (!cachedProfile) await fetchAndCacheProfile();
+            return { session, sb };
+        })();
+
+        const grid = document.getElementById("photo-grid");
+        const alertEl = document.getElementById("alert");
+        const submitBtn = document.getElementById("submit");
+        const fileInput = document.getElementById("file");
+        const overlay = document.getElementById("crop-overlay");
+        const cropperImg = document.getElementById("cropper-img");
+
+        // Resolved once `ready` settles — until then we don't have storage URLs.
+        let session = null;
+        let sb = null;
+        const photos = [];
+
+        // Seed photos from the cached profile so the grid paints with
+        // existing thumbnails immediately. publicUrl() is unavailable
+        // until `ready` resolves, but we can still know the IDs.
+        const initialFromCache = Array.isArray(cachedProfile?.profile_photos)
+            ? cachedProfile.profile_photos
+                .map((p) => (typeof p === "string" ? p : p?.id))
+                .filter(Boolean)
+            : [];
+        photos.push(...initialFromCache);
+
+        function publicUrl(photoId) {
+            if (!sb || !session) return "";
+            const { data } = sb.storage
+                .from("profile_photos")
+                .getPublicUrl(`${session.user.id}/${photoId}`);
+            return data?.publicUrl || "";
+        }
+
+        // Index of the photo to replace when the user re-picks a file.
+        // null = adding a new one.
+        let replaceIndex = null;
+
+        function render() {
+            let html = "";
+            for (let i = 0; i < TOTAL_SLOTS; i++) {
+                const id = photos[i];
+                if (id) {
+                    html += `<div class="photo-slot filled" data-index="${i}">
+                        <img src="${publicUrl(id)}" alt="">
+                        <button type="button" class="remove-btn" data-index="${i}" aria-label="edit">${ICON_EDIT}</button>
+                    </div>`;
+                } else if (i === photos.length) {
+                    html += `<div class="photo-slot" data-add="1">
+                        <span class="add-icon">+</span>
+                    </div>`;
+                } else {
+                    html += `<div class="photo-slot" data-disabled="1" style="opacity:0.5; cursor:not-allowed;"></div>`;
+                }
+            }
+            grid.innerHTML = html;
+            grid.querySelectorAll('[data-add="1"]').forEach((el) =>
+                el.addEventListener("click", () => {
+                    replaceIndex = null;
+                    fileInput.click();
+                })
+            );
+            grid.querySelectorAll(".remove-btn").forEach((btn) =>
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const i = parseInt(btn.getAttribute("data-index"), 10);
+                    openPhotoMenu(i);
+                })
+            );
+        }
+
+        function openPhotoMenu(index) {
+            const host = document.getElementById("photo-menu-host");
+            const close = () => {
+                document.body.classList.remove("modal-open");
+                host.innerHTML = "";
+            };
+            host.innerHTML = `<div class="modal-backdrop">
+                <div class="modal-card" style="max-width:360px;">
+                    <div class="modal-header">
+                        <h2>${t("photos_menu_title")}</h2>
+                    </div>
+                    <div style="padding:8px 16px 16px; display:flex; flex-direction:column; gap:8px;">
+                        <button type="button" class="signup-btn outline" id="menu-replace">${t("photos_menu_replace")}</button>
+                        <button type="button" class="signup-btn outline" id="menu-delete" style="color:#C0354F;">${t("photos_menu_delete")}</button>
+                        <button type="button" class="signup-btn ghost" id="menu-cancel">${t("bg_dialog_cancel")}</button>
+                    </div>
+                </div>
+            </div>`;
+            document.body.classList.add("modal-open");
+            host.querySelector(".modal-backdrop").addEventListener("click", (e) => {
+                if (e.target.classList.contains("modal-backdrop")) close();
+            });
+            host.querySelector("#menu-cancel").addEventListener("click", close);
+            host.querySelector("#menu-replace").addEventListener("click", () => {
+                replaceIndex = index;
+                close();
+                fileInput.click();
+            });
+            host.querySelector("#menu-delete").addEventListener("click", async () => {
+                close();
+                const id = photos[index];
+                if (!id) return;
+                photos.splice(index, 1);
+                render();
+                try {
+                    const r = await ready;
+                    await r.sb.storage
+                        .from("profile_photos")
+                        .remove([`${r.session.user.id}/${id}`]);
+                } catch { /* ignore */ }
+                persistPhotos();
+            });
+        }
+
+        async function persistPhotos() {
+            try {
+                const r = await ready;
+                await r.sb.from("users")
+                    .update({ profile_photos: photos })
+                    .eq("id", r.session.user.id);
+                patchCachedProfile({ profile_photos: photos.slice() });
+            } catch { /* surface only on submit */ }
+        }
+
+        // ===== Initial paint (uses cache if available) =====
+        render();
+
+        // Once ready, store sb/session for uploads + re-render so the
+        // <img src> public URLs resolve. If the cache was missing the
+        // freshly fetched profile is now in cache — pull photo IDs out.
+        ready.then((r) => {
+            sb = r.sb;
+            session = r.session;
+            if (!cachedProfile) {
+                const latest = getCachedProfile();
+                const initial = Array.isArray(latest?.profile_photos) ? latest.profile_photos : [];
+                const ids = initial.map((p) => (typeof p === "string" ? p : p?.id)).filter(Boolean);
+                photos.splice(0, photos.length, ...ids);
+            }
+            render();
+        });
+
+        // ===== File picker → crop overlay =====
+        let cropper = null;
+
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files?.[0];
+            if (!file) return;
+            if (!file.type.startsWith("image/")) {
+                showAlert(alertEl, "error", "Please choose an image file.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                cropperImg.src = reader.result;
+                overlay.style.display = "flex";
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropperImg, {
+                    aspectRatio: 1, // 1:1, matches Android profile photo grid
+                    viewMode: 1,
+                    dragMode: "move",
+                    autoCropArea: 1,
+                    background: false,
+                    movable: true,
+                    zoomable: true,
+                    rotatable: false,
+                    scalable: false,
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById("cancel-crop").addEventListener("click", () => {
+            if (cropper) { cropper.destroy(); cropper = null; }
+            overlay.style.display = "none";
+            fileInput.value = "";
+        });
+
+        document.getElementById("save-crop").addEventListener("click", () => {
+            if (!cropper) return;
+            // 1:1 square — matches Android dimensionRatio="1:1" on photo slots.
+            const canvas = cropper.getCroppedCanvas({
+                width: 1200,
+                height: 1200,
+                imageSmoothingQuality: "high",
+            });
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                cropper.destroy();
+                cropper = null;
+                overlay.style.display = "none";
+                fileInput.value = "";
+
+                hideAlert(alertEl);
+                const r = await ready;
+                const photoId = crypto.randomUUID();
+                const path = `${r.session.user.id}/${photoId}`;
+                const isReplace = replaceIndex != null && photos[replaceIndex];
+                const targetIndex = isReplace ? replaceIndex : photos.length;
+                const oldId = isReplace ? photos[replaceIndex] : null;
+
+                if (isReplace) {
+                    photos[replaceIndex] = photoId;
+                } else {
+                    photos.push(photoId);
+                }
+                replaceIndex = null;
+                render();
+
+                // Optimistic preview swap while we upload.
+                const slot = grid.querySelector(`[data-index="${targetIndex}"]`);
+                if (slot) {
+                    const img = slot.querySelector("img");
+                    if (img) img.src = URL.createObjectURL(blob);
+                    const overlayDiv = document.createElement("div");
+                    overlayDiv.className = "uploading";
+                    overlayDiv.innerHTML = `<span class="signup-spinner" style="border-color:rgba(101,66,173,0.3); border-top-color:var(--color-primary);"></span>`;
+                    slot.appendChild(overlayDiv);
+                }
+
+                try {
+                    const { error: upErr } = await r.sb.storage
+                        .from("profile_photos")
+                        .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+                    if (upErr) throw upErr;
+                    if (oldId) {
+                        try {
+                            await r.sb.storage
+                                .from("profile_photos")
+                                .remove([`${r.session.user.id}/${oldId}`]);
+                        } catch { /* ignore */ }
+                    }
+                    await persistPhotos();
+                } catch (err) {
+                    if (isReplace) {
+                        photos[targetIndex] = oldId;
+                    } else {
+                        photos.pop();
+                    }
+                    render();
+                    showAlert(alertEl, "error", String(err?.message || err));
+                    return;
+                }
+                render();
+            }, "image/jpeg", 0.9);
+        });
+
+        // ===== Submit =====
+        submitBtn.addEventListener("click", async () => {
+            hideAlert(alertEl);
+            if (photos.length < 2) {
+                showAlert(alertEl, "error", t("photos_err_min"));
+                return;
+            }
+            setLoading(submitBtn, true);
+            try {
+                await persistPhotos();
+                window.location.href = "/onboarding/looking-for.html";
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

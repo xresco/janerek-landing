@@ -368,6 +368,74 @@ img {
     margin-right: auto;
 }
 
+/* ===== Signup Band =====
+ * Sits right after the hero. Visually distinct from the rest of the
+ * page so the "create an account online" path stays obvious without
+ * competing with the app-store buttons in the hero or the bottom CTA. */
+.signup-band {
+    padding: 56px 0;
+    background:
+        linear-gradient(135deg, rgba(101, 66, 173, 0.06) 0%, rgba(163, 52, 106, 0.06) 100%),
+        var(--color-bg-deep);
+    border-top: 1px solid var(--color-bg-card-hover);
+    border-bottom: 1px solid var(--color-bg-card-hover);
+}
+
+.signup-band-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.signup-band-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.signup-band-text h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+}
+
+.signup-band-text p {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    max-width: 540px;
+}
+
+.signup-band-cta {
+    flex: 0 0 auto;
+}
+
+/* Flip the arrow under RTL so it still points "forward" toward the
+ * end of the line. The icon itself is drawn LTR; we mirror it. */
+html[dir="rtl"] .signup-band-cta svg {
+    transform: scaleX(-1);
+}
+
+@media (max-width: 720px) {
+    .signup-band {
+        padding: 40px 0;
+    }
+    .signup-band-inner {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    .signup-band-text p {
+        margin: 0 auto;
+    }
+    .signup-band-cta {
+        align-self: center;
+    }
+}
+
 /* ===== Features ===== */
 .features {
     padding: var(--section-padding);

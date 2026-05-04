@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a class="nav-logo" href="/">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card has-bottom-bar">
+            <div class="signup-header-row">
+                <div class="pink-circle" id="header-icon" aria-hidden="true"></div>
+                <div class="page-step-indicator" data-step="1" aria-label="Step 1 of 5"></div>
+            </div>
+
+            <h1 data-i18n="main_title">لنبدأ</h1>
+            <p class="subtitle" data-i18n="main_subtitle">يسعدنا انضمامك إلينا!</p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <form id="form" novalidate>
+                <!-- Name -->
+                <span class="section-label first" data-i18n="main_section_name">ما هو اسمك الكامل</span>
+                <div class="signup-field" id="field-name">
+                    <input type="text" id="name" autocomplete="given-name"
+                           data-i18n-placeholder="main_name_placeholder" placeholder="اسمك">
+                    <div class="field-error" data-i18n="main_err_name"></div>
+                </div>
+
+                <!-- DOB -->
+                <span class="section-label" data-i18n="main_section_dob">تاريخ الميلاد</span>
+                <div class="signup-field" id="field-dob">
+                    <div class="dob-group">
+                        <select id="day" aria-label="Day"></select>
+                        <select id="month" aria-label="Month"></select>
+                        <select id="year" aria-label="Year"></select>
+                    </div>
+                    <div class="field-error" data-i18n="main_err_dob"></div>
+                </div>
+
+                <!-- Gender -->
+                <span class="section-label" data-i18n="main_section_gender">الجنس</span>
+                <div class="signup-field" id="field-gender">
+                    <div class="chip-flex" id="gender-chips" role="radiogroup">
+                        <button type="button" class="chip" data-value="MALE" role="radio">
+                            <span data-i18n="main_gender_male">ذكر</span>
+                        </button>
+                        <button type="button" class="chip" data-value="FEMALE" role="radio">
+                            <span data-i18n="main_gender_female">أنثى</span>
+                        </button>
+                    </div>
+                    <div class="field-error" data-i18n="main_err_gender"></div>
+                </div>
+            </form>
+        </main>
+
+        <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+                <button type="button" class="signup-btn primary" id="submit" data-i18n="ob_continue">التالي</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            bootSignupPage, supabase, requireSession, t, currentLang,
+            showAlert, hideAlert, setLoading,
+            getCachedProfile, patchCachedProfile, fetchAndCacheProfile,
+        } from "/js/signup-shared.js";
+        import { HEADER_ICON } from "/js/onboarding-icons.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+        document.getElementById("header-icon").innerHTML = HEADER_ICON.face;
+
+        // Profile is normally cached after the auth callback runs, so the
+        // initial paint reads it synchronously. If the cache is missing
+        // (e.g. user hard-reloaded a deep link), fall back to a fetch.
+        const cachedProfile = getCachedProfile();
+
+        // We only need sb + session for the *write* on submit. Defer that.
+        const ready = (async () => {
+            const session = await requireSession();
+            const sb = await supabase();
+            if (!cachedProfile) await fetchAndCacheProfile();
+            return { session, sb };
+        })();
+
+        const daySel = document.getElementById("day");
+        const monthSel = document.getElementById("month");
+        const yearSel = document.getElementById("year");
+        const nameInput = document.getElementById("name");
+        const alertEl = document.getElementById("alert");
+        const submitBtn = document.getElementById("submit");
+        const fieldName = document.getElementById("field-name");
+        const fieldDob = document.getElementById("field-dob");
+        const fieldGender = document.getElementById("field-gender");
+
+        // ===== Populate DOB selects =====
+        const monthNames = {
+            en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+            ar: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
+        };
+
+        function populate() {
+            const lang = currentLang();
+            const names = monthNames[lang] || monthNames.en;
+            const opt = (v, l) => `<option value="${v}">${l}</option>`;
+            const placeholder = (k) => `<option value="" disabled selected>${t(k)}</option>`;
+
+            const d = daySel.value;
+            const m = monthSel.value;
+            const y = yearSel.value;
+
+            daySel.innerHTML = placeholder("main_dob_day") +
+                Array.from({ length: 31 }, (_, i) => opt(i + 1, i + 1)).join("");
+            monthSel.innerHTML = placeholder("main_dob_month") +
+                names.map((n, i) => opt(i + 1, n)).join("");
+            const now = new Date().getFullYear();
+            const years = [];
+            for (let yy = now - 18; yy >= now - 100; yy--) years.push(yy);
+            yearSel.innerHTML = placeholder("main_dob_year") +
+                years.map((yy) => opt(yy, yy)).join("");
+
+            if (d) daySel.value = d;
+            if (m) monthSel.value = m;
+            if (y) yearSel.value = y;
+        }
+        populate();
+        window.addEventListener("janerek-lang-changed", populate);
+
+        // ===== Gender chip selection =====
+        let selectedGender = null;
+        document.querySelectorAll("#gender-chips .chip").forEach((chip) => {
+            chip.addEventListener("click", () => {
+                document.querySelectorAll("#gender-chips .chip").forEach((c) => c.classList.remove("selected"));
+                chip.classList.add("selected");
+                selectedGender = chip.getAttribute("data-value");
+                fieldGender.classList.remove("error");
+            });
+        });
+
+        // ===== Synchronous prefill from cached profile =====
+        function applyPrefill(row) {
+            if (!row) return;
+            if (row.name) nameInput.value = row.name;
+            if (row.birthday) {
+                const [yy, mm, dd] = row.birthday.split("-");
+                yearSel.value = String(parseInt(yy, 10));
+                monthSel.value = String(parseInt(mm, 10));
+                daySel.value = String(parseInt(dd, 10));
+            }
+            if (row.gender) {
+                const g = String(row.gender).toUpperCase();
+                const chip = document.querySelector(`#gender-chips .chip[data-value="${g}"]`);
+                if (chip) {
+                    chip.classList.add("selected");
+                    selectedGender = g;
+                }
+            }
+        }
+        applyPrefill(cachedProfile);
+        if (!cachedProfile) ready.then(() => applyPrefill(getCachedProfile()));
+
+        // Clear field-error styling as the user edits.
+        nameInput.addEventListener("input", () => fieldName.classList.remove("error"));
+        [daySel, monthSel, yearSel].forEach((el) =>
+            el.addEventListener("change", () => fieldDob.classList.remove("error"))
+        );
+
+        // ===== Submit =====
+        submitBtn.addEventListener("click", async () => {
+            hideAlert(alertEl);
+            fieldName.classList.remove("error");
+            fieldDob.classList.remove("error");
+            fieldGender.classList.remove("error");
+
+            const name = nameInput.value.trim();
+            if (name.length < 2) {
+                fieldName.classList.add("error");
+                nameInput.focus();
+                return;
+            }
+
+            const d = parseInt(daySel.value, 10);
+            const m = parseInt(monthSel.value, 10);
+            const y = parseInt(yearSel.value, 10);
+            if (!d || !m || !y) {
+                fieldDob.classList.add("error");
+                return;
+            }
+
+            // Verify the day actually exists in that month/year (e.g. Feb 30).
+            const dob = new Date(Date.UTC(y, m - 1, d));
+            if (
+                dob.getUTCFullYear() !== y ||
+                dob.getUTCMonth() !== m - 1 ||
+                dob.getUTCDate() !== d
+            ) {
+                fieldDob.classList.add("error");
+                return;
+            }
+
+            // 18+ gate (matches Android age_restriction_warning).
+            const today = new Date();
+            const eighteenAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            if (dob > eighteenAgo) {
+                fieldDob.classList.add("error");
+                showAlert(alertEl, "error", t("main_err_dob_too_young"));
+                return;
+            }
+
+            if (!selectedGender) {
+                fieldGender.classList.add("error");
+                return;
+            }
+
+            setLoading(submitBtn, true);
+            try {
+                const { sb, session } = await ready;
+                const ymd = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                const patch = { name, birthday: ymd, gender: selectedGender };
+                const { error } = await sb
+                    .from("users")
+                    .update(patch)
+                    .eq("id", session.user.id);
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(submitBtn, false);
+                    return;
+                }
+                patchCachedProfile(patch);
+                window.location.href = "/onboarding/background.html";
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>

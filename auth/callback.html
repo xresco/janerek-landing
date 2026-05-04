@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a href="/" class="nav-logo">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+        </header>
+
+        <main class="signup-card" style="text-align:center;">
+            <div id="loading">
+                <div class="signup-spinner" style="width:28px; height:28px; border-width:3px; border-color:rgba(101,66,173,0.3); border-top-color:var(--color-primary); margin:32px auto;"></div>
+                <p class="subtitle" data-i18n="callback_loading">جارٍ تسجيل الدخول…</p>
+            </div>
+
+            <div id="failed" style="display:none;">
+                <h1 data-i18n="callback_failed_title">فشل تسجيل الدخول</h1>
+                <p class="subtitle" data-i18n="callback_failed_body">حدث خطأ أثناء إكمال تسجيل الدخول. يُرجى المحاولة مرة أخرى.</p>
+                <p class="subtitle" id="error-detail" style="font-size:0.85rem;"></p>
+                <a href="/signup/" class="signup-btn primary" data-i18n="callback_retry">العودة إلى التسجيل</a>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { bootSignupPage, supabase, nextOnboardingStep } from "/js/signup-shared.js";
+
+        bootSignupPage({ title: { ar: "جانرك", en: "Janerek" } });
+
+        function fail(detail) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("failed").style.display = "block";
+            if (detail) document.getElementById("error-detail").textContent = detail;
+        }
+
+        (async () => {
+            try {
+                const url = new URL(window.location.href);
+                // Errors arrive in either the query string (?error=) or
+                // the hash (#error=) depending on the provider/flow.
+                const hashParams = new URLSearchParams(
+                    url.hash.startsWith("#") ? url.hash.slice(1) : ""
+                );
+                const errParam =
+                    url.searchParams.get("error_description") ||
+                    url.searchParams.get("error") ||
+                    hashParams.get("error_description") ||
+                    hashParams.get("error");
+                if (errParam) {
+                    fail(errParam);
+                    return;
+                }
+
+                // The SDK is configured with `detectSessionInUrl: true` +
+                // `flowType: "implicit"`, so it auto-parses the
+                // `#access_token=…&refresh_token=…` from magic-link and
+                // OAuth callbacks. We just wait for the session to land.
+                const sb = await supabase();
+                let session = (await sb.auth.getSession()).data.session;
+
+                // Give the SDK a beat in case parsing hasn't completed
+                // synchronously (it dispatches an async event).
+                if (!session) {
+                    for (let i = 0; i < 8 && !session; i++) {
+                        await new Promise((r) => setTimeout(r, 200));
+                        session = (await sb.auth.getSession()).data.session;
+                    }
+                }
+                if (!session) {
+                    fail("No session — the link may have expired or already been used.");
+                    return;
+                }
+
+                // Wait briefly for the on_auth_user_updated trigger to
+                // create the public.users row before we route.
+                await new Promise((r) => setTimeout(r, 250));
+
+                const dest = await nextOnboardingStep();
+                window.location.replace(dest);
+            } catch (err) {
+                fail(String(err?.message || err));
+            }
+        })();
+    </script>
+</body>
+</html>

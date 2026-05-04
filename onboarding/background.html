@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6542AD">
+    <title>جانرك — التسجيل</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body class="lang-ar">
+    <div class="signup-shell">
+        <header class="signup-topbar">
+            <a class="nav-logo" href="/onboarding/main.html">
+                <svg class="nav-icon" viewBox="0 0 465 465" width="28" height="28" aria-hidden="true">
+                    <circle cx="232.5" cy="232.5" r="232.5" fill="#FCE8F3"/>
+                    <path d="M289.13,232.5a106.29,106.29 135,1 0,-212.57 0a106.29,106.29 45,1 0,212.57 0z" fill="#7B2FBE" fill-opacity="0.6"/>
+                    <path d="M387.44,233.83a104.96,104.96 0,1 0,-209.91 0a104.96,104.96 0,1 0,209.91 0z" fill="#D41858" fill-opacity="0.6"/>
+                </svg>
+                <span data-i18n="app_name">جانرك</span>
+            </a>
+            <button class="lang-toggle" id="langToggle">
+                <span class="lang-option" data-lang="ar">ع</span>
+                <span class="lang-divider">|</span>
+                <span class="lang-option" data-lang="en">EN</span>
+            </button>
+        </header>
+
+        <main class="signup-card has-bottom-bar">
+            <div class="signup-header-row">
+                <div class="pink-circle" id="header-icon" aria-hidden="true"></div>
+                <div class="page-step-indicator" data-step="2" aria-label="Step 2 of 5"></div>
+            </div>
+
+            <h1 data-i18n="bg_title">خلفيتك</h1>
+            <p class="subtitle" data-i18n="bg_subtitle"></p>
+
+            <div class="signup-alert error" id="alert" style="display:none;"></div>
+
+            <!-- Religion (single-select chips) -->
+            <span class="section-label first" data-i18n="bg_section_religion">الديانة</span>
+            <div class="signup-field" id="field-religion">
+                <div class="chip-flex" id="religion-chips"></div>
+                <div class="field-error" data-i18n="bg_err_religion"></div>
+            </div>
+
+            <!-- Nationality (single, opens modal) -->
+            <span class="section-label" data-i18n="bg_section_nationality">الجنسية</span>
+            <div class="signup-field" id="field-nationality">
+                <div class="chip-flex" id="nationality-chips"></div>
+                <div class="field-error" data-i18n="bg_err_nationality"></div>
+            </div>
+
+            <!-- Languages (up to 4, opens modal) -->
+            <span class="section-label" data-i18n="bg_section_language">اللغات المنطوقة</span>
+            <div class="signup-field" id="field-languages">
+                <div class="chip-flex" id="language-chips"></div>
+                <div class="field-error" data-i18n="bg_err_language"></div>
+            </div>
+        </main>
+
+        <div class="bottom-bar">
+            <div class="bottom-bar-inner">
+                <a href="/onboarding/main.html" class="signup-btn outline" aria-label="Back" id="prev-btn"></a>
+                <button type="button" class="signup-btn primary" id="submit" data-i18n="ob_continue">التالي</button>
+            </div>
+        </div>
+
+        <!-- Selection dialog (rendered into body when open) -->
+        <div id="modal-host"></div>
+    </div>
+
+    <script type="module">
+        import {
+            bootSignupPage, supabase, requireSession, t, currentLang,
+            showAlert, hideAlert, setLoading,
+            getCachedProfile, patchCachedProfile, fetchAndCacheProfile,
+        } from "/js/signup-shared.js";
+        import {
+            RELIGIONS, RELIGION_LABELS,
+            COUNTRY_NAMES, LANGUAGE_LABELS,
+            orderedCountries, orderedLanguages, flagEmoji,
+        } from "/js/onboarding-data.js";
+        import { HEADER_ICON, RELIGION_ICON, ICON_BACK } from "/js/onboarding-icons.js";
+        import { openSelectionModal } from "/js/onboarding-modal.js";
+
+        bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
+        document.getElementById("header-icon").innerHTML = HEADER_ICON.background;
+        document.getElementById("prev-btn").innerHTML = ICON_BACK;
+
+        // Profile cache → instant prefill, no per-page DB roundtrip.
+        const cachedProfile = getCachedProfile();
+        const ready = (async () => {
+            const session = await requireSession();
+            const sb = await supabase();
+            if (!cachedProfile) await fetchAndCacheProfile();
+            return { session, sb };
+        })();
+
+        const fieldReligion = document.getElementById("field-religion");
+        const fieldNationality = document.getElementById("field-nationality");
+        const fieldLanguages = document.getElementById("field-languages");
+        const alertEl = document.getElementById("alert");
+        const submitBtn = document.getElementById("submit");
+
+        // ===== State =====
+        let religion = null;       // string key
+        let nationality = null;    // ISO-2 code
+        let languages = [];        // array of language keys (max 4)
+
+        // ===== Religion chips =====
+        const religionHost = document.getElementById("religion-chips");
+        function renderReligions() {
+            const lang = currentLang();
+            const labels = RELIGION_LABELS[lang] || RELIGION_LABELS.en;
+            religionHost.innerHTML = RELIGIONS.map((r) => {
+                const sel = r === religion ? " selected" : "";
+                const icon = RELIGION_ICON[r] || "";
+                return `<button type="button" class="chip${sel}" data-value="${r}">
+                    ${icon ? `<span class="chip-icon chip-icon-svg">${icon}</span>` : ""}
+                    <span>${labels[r] || r}</span>
+                </button>`;
+            }).join("");
+            religionHost.querySelectorAll(".chip").forEach((c) => {
+                c.addEventListener("click", () => {
+                    religion = c.getAttribute("data-value");
+                    renderReligions();
+                    fieldReligion.classList.remove("error");
+                });
+            });
+        }
+
+        // ===== Nationality chip (single) =====
+        const nationalityHost = document.getElementById("nationality-chips");
+        function renderNationality() {
+            const lang = currentLang();
+            const names = COUNTRY_NAMES[lang] || COUNTRY_NAMES.en;
+            let html = "";
+            if (nationality) {
+                html += `<span class="chip selected" data-value="${nationality}">
+                    <span class="chip-icon">${flagEmoji(nationality)}</span>
+                    <span>${names[nationality] || nationality}</span>
+                    <button type="button" class="chip-remove" aria-label="remove">×</button>
+                </span>`;
+            }
+            html += `<button type="button" class="chip add" id="nationality-add">
+                <span>+</span>
+                <span>${t("bg_pick_nationality")}</span>
+            </button>`;
+            nationalityHost.innerHTML = html;
+            const removeBtn = nationalityHost.querySelector(".chip-remove");
+            if (removeBtn) {
+                removeBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    nationality = null;
+                    renderNationality();
+                });
+            }
+            document.getElementById("nationality-add").addEventListener("click", openNationalityModal);
+        }
+
+        // ===== Language chips (multi, max 4) =====
+        const languageHost = document.getElementById("language-chips");
+        function renderLanguages() {
+            const lang = currentLang();
+            const labels = LANGUAGE_LABELS[lang] || LANGUAGE_LABELS.en;
+            let html = "";
+            languages.forEach((l) => {
+                html += `<span class="chip selected" data-value="${l}">
+                    <span>${labels[l] || l}</span>
+                    <button type="button" class="chip-remove" aria-label="remove">×</button>
+                </span>`;
+            });
+            html += `<button type="button" class="chip add" id="language-add">
+                <span>+</span>
+                <span>${t("bg_pick_languages")}</span>
+            </button>`;
+            languageHost.innerHTML = html;
+            languageHost.querySelectorAll(".chip-remove").forEach((btn, i) => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const val = btn.parentElement.getAttribute("data-value");
+                    languages = languages.filter((x) => x !== val);
+                    renderLanguages();
+                });
+            });
+            document.getElementById("language-add").addEventListener("click", openLanguageModal);
+        }
+
+        // ===== Selection modal hosts =====
+        const host = document.getElementById("modal-host");
+
+        function openNationalityModal() {
+            const lang = currentLang();
+            const names = COUNTRY_NAMES[lang] || COUNTRY_NAMES.en;
+            const items = orderedCountries(lang).map((code) => ({
+                value: code,
+                label: names[code] || code,
+                icon: `<span style="font-size:1.1rem">${flagEmoji(code)}</span>`,
+            }));
+            openSelectionModal({
+                host,
+                title: t("bg_section_nationality"),
+                items,
+                multi: false,
+                initial: nationality ? [nationality] : [],
+                searchPlaceholder: t("bg_dialog_search"),
+                onDone: (sel) => {
+                    nationality = sel[0] || null;
+                    renderNationality();
+                    fieldNationality.classList.remove("error");
+                },
+            });
+        }
+
+        function openLanguageModal() {
+            const lang = currentLang();
+            const labels = LANGUAGE_LABELS[lang] || LANGUAGE_LABELS.en;
+            const items = orderedLanguages(lang).map((key) => ({
+                value: key, label: labels[key] || key,
+            }));
+            openSelectionModal({
+                host,
+                title: t("bg_section_language"),
+                items,
+                multi: true,
+                limit: 4,
+                limitWarning: t("bg_lang_limit"),
+                initial: languages.slice(),
+                searchPlaceholder: t("bg_dialog_search"),
+                cancelText: t("bg_dialog_cancel"),
+                doneText: t("bg_dialog_done"),
+                onDone: (sel) => {
+                    languages = sel.slice(0, 4);
+                    renderLanguages();
+                    if (languages.length > 0) fieldLanguages.classList.remove("error");
+                },
+            });
+        }
+
+        function applyPrefill(row) {
+            if (!row) return;
+            if (row.religion) religion = row.religion;
+            if (row.nationality) nationality = row.nationality;
+            if (Array.isArray(row.languages)) languages = row.languages.slice(0, 4);
+        }
+        applyPrefill(cachedProfile);
+
+        // Initial paint (with cached values if available).
+        renderReligions();
+        renderNationality();
+        renderLanguages();
+
+        window.addEventListener("janerek-lang-changed", () => {
+            renderReligions();
+            renderNationality();
+            renderLanguages();
+        });
+
+        // Cache miss fallback — hydrate after fetch completes.
+        if (!cachedProfile) {
+            ready.then(() => {
+                applyPrefill(getCachedProfile());
+                renderReligions();
+                renderNationality();
+                renderLanguages();
+            });
+        }
+
+        // ===== Submit =====
+        submitBtn.addEventListener("click", async () => {
+            hideAlert(alertEl);
+            fieldReligion.classList.remove("error");
+            fieldNationality.classList.remove("error");
+            fieldLanguages.classList.remove("error");
+
+            if (!religion) {
+                fieldReligion.classList.add("error");
+                return;
+            }
+            if (!nationality) {
+                fieldNationality.classList.add("error");
+                return;
+            }
+            if (languages.length === 0) {
+                fieldLanguages.classList.add("error");
+                return;
+            }
+
+            setLoading(submitBtn, true);
+            try {
+                const { sb, session } = await ready;
+                const patch = { religion, nationality, languages };
+                const { error } = await sb
+                    .from("users")
+                    .update(patch)
+                    .eq("id", session.user.id);
+                if (error) {
+                    showAlert(alertEl, "error", error.message);
+                    setLoading(submitBtn, false);
+                    return;
+                }
+                patchCachedProfile(patch);
+                window.location.href = "/onboarding/story.html";
+            } catch (err) {
+                showAlert(alertEl, "error", String(err?.message || err));
+                setLoading(submitBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>
