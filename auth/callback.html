@@ -92,6 +92,10 @@
                 // create the public.users row before we route.
                 await new Promise((r) => setTimeout(r, 250));
 
+                // Stamp 'web' onto users.platforms — fire and forget. The
+                // RPC is idempotent, so re-runs (re-login etc.) are no-ops.
+                sb.rpc("add_my_platform", { p_platform: "web" });
+
                 const dest = await nextOnboardingStep();
                 window.location.replace(dest);
             } catch (err) {

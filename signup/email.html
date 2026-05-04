@@ -51,6 +51,10 @@
         const submitBtn = document.getElementById("submit");
         const alertEl = document.getElementById("alert");
 
+        // Reset the submit button on pageshow (covers bfcache restores
+        // where the spinner would otherwise be frozen on).
+        window.addEventListener("pageshow", () => setLoading(submitBtn, false));
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             hideAlert(alertEl);

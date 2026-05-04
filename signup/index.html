@@ -150,6 +150,20 @@
             btn.addEventListener("click", () => signInWith(btn, btn.dataset.provider));
         });
 
+        // When the page is restored from the browser's back-forward
+        // cache (e.g. user clicks a provider, hits an Apple/Google
+        // error page, then taps Back), the buttons keep their stale
+        // loading state. Reset every provider button to idle on any
+        // pageshow event — pageshow fires both on fresh load and on
+        // bfcache restore.
+        function resetProviderButtons() {
+            document.querySelectorAll("[data-provider]").forEach((b) => {
+                setLoading(b, false);
+                b.disabled = false;
+            });
+        }
+        window.addEventListener("pageshow", resetProviderButtons);
+
         // Hide the page loader once we've confirmed we're staying on
         // this screen (no session). If we have a session, the loader
         // stays visible until the redirect resolves.
