@@ -76,6 +76,7 @@
             footer_company: 'الشركة',
             footer_privacy: 'سياسة الخصوصية',
             footer_terms: 'شروط الاستخدام',
+            footer_child_safety: 'حماية الأطفال',
             footer_contact: 'تواصل معنا',
             footer_copy: '\u00A9 2026 جانرك. جميع الحقوق محفوظة.'
         },
@@ -150,6 +151,7 @@
             footer_company: 'Company',
             footer_privacy: 'Privacy Policy',
             footer_terms: 'Terms of Service',
+            footer_child_safety: 'Child Safety',
             footer_contact: 'Contact Us',
             footer_copy: '\u00A9 2026 Janerek. All rights reserved.'
         }
