@@ -675,6 +675,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
      data-android-pkg="com.janerek"
      data-android-store="${playStoreUrl}"
      data-ios-store="${appStoreUrl}"
+     data-ios-scheme="com.janerek://user/${userId}"
      data-universal-link="${shareUrl}">
     ${escapeHtml(s(lang, "openInApp", appName))}
   </a>
@@ -746,7 +747,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       } else if (isIOS) {
         e.preventDefault();
         var t = Date.now();
-        window.location.href = btn.dataset.universalLink;
+        // iOS blocks same-domain Universal Links (you can't tap a link
+        // on janerek.com that opens janerek.com in the app). Use the
+        // custom URL scheme (com.janerek://user/<id>) — registered in
+        // the app's Info.plist and routed by SharedProfileRouter — and
+        // fall through to the App Store after 1.5s if the app isn't
+        // installed (no scheme handler intercepted the navigation).
+        window.location.href = btn.dataset.iosScheme;
         setTimeout(function () {
           if (Date.now() - t < 1800) window.location.href = btn.dataset.iosStore;
         }, 1500);
