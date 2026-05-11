@@ -39,6 +39,11 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    /* iOS Safari needs overflow-x clipping on BOTH html and body for RTL
+       pages — body alone leaks horizontal scroll when any child has an
+       intrinsic min-content wider than the viewport. */
+    overflow-x: hidden;
+    max-width: 100vw;
 }
 
 body {
@@ -47,6 +52,8 @@ body {
     color: var(--color-text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -108,6 +115,15 @@ img {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* Flex blowout guard: prevents children with long unbreakable content
+       (Arabic words, language toggle) from pushing the container wider
+       than its parent in RTL mobile. */
+    min-width: 0;
+    gap: 12px;
+}
+
+.nav-logo {
+    min-width: 0;
 }
 
 .nav-logo {
