@@ -20,6 +20,21 @@ attribute on language change (see `js/main.js`, `data-marketing="..."`).
 | `en/persona-2.jpg`    | https://www.pexels.com/photo/14678052/  (couple at a window, thoughtful shared gaze, warm light)      |
 | `en/persona-3.jpg`    | https://www.pexels.com/photo/6848346/   (mature couple looking into each other's eyes, composed)     |
 
+## Demo card-stack photos (solo profile portraits)
+
+The "How a match feels" demo shows individual profiles (Janerek is a
+marriage app — you swipe singles, not couples), so these are deliberately
+distinct from the persona images above.
+
+| File                  | Source                                                          |
+|-----------------------|-----------------------------------------------------------------|
+| `ar/card-1.jpg`       | https://www.pexels.com/photo/6475999/   (woman in hijab smiling, modern indoor)  |
+| `ar/card-2.jpg`       | https://www.pexels.com/photo/13108255/  (Middle Eastern man, thoughtful)         |
+| `ar/card-3.jpg`       | https://www.pexels.com/photo/5071528/   (young man, casual close-up)             |
+| `en/card-1.jpg`       | https://www.pexels.com/photo/29123197/  (young woman indoors, soft warm light)   |
+| `en/card-2.jpg`       | https://www.pexels.com/photo/19797864/  (man with blue eyes, outdoor portrait)   |
+| `en/card-3.jpg`       | https://www.pexels.com/photo/9629932/   (confident young Black man, outdoor)     |
+
 Photos were downscaled with `sips` (`-Z 1100 -s formatOptions 72`) for
 web delivery. Originals are not stored — re-download from the source
 URLs above if you need higher-resolution versions.

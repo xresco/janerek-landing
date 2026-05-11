@@ -231,6 +231,10 @@ img {
 .hero {
     position: relative;
     min-height: 100vh;
+    /* svh handles mobile Safari's 100vh-includes-URL-bar quirk: on first
+       paint with the URL bar visible, 100vh measures larger than what's
+       visible, pushing content below the fold. */
+    min-height: 100svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -947,32 +951,34 @@ html[dir="rtl"] .signup-band-cta svg {
         display: flex;
     }
 
+    /* Top-down slide (Lustimacy-style) — drops below the navbar from
+       above the viewport. Works the same in LTR and RTL since the
+       transform is on the Y axis. */
     .nav-links {
         position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background: var(--color-bg-deep);
+        top: 64px;
+        left: 0;
+        right: 0;
+        width: auto;
+        max-height: calc(100vh - 64px);
+        max-height: calc(100svh - 64px);
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(101, 66, 173, 0.1);
         flex-direction: column;
-        padding: 80px 32px 32px;
-        gap: 24px;
-        transition: right var(--transition);
-        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-    }
-
-    [dir="rtl"] .nav-links {
-        right: auto;
-        left: -100%;
+        align-items: stretch;
+        padding: 24px 24px 32px;
+        gap: 18px;
+        transform: translateY(-120%);
+        transition: transform var(--transition);
+        box-shadow: 0 14px 30px -10px rgba(101, 66, 173, 0.18);
+        z-index: 999;
     }
 
     .nav-links.open {
-        right: 0;
-    }
-
-    [dir="rtl"] .nav-links.open {
-        right: auto;
-        left: 0;
+        transform: translateY(0);
     }
 
     .nav-links a {
@@ -1094,6 +1100,7 @@ body.lang-en .newsletter-title {
     isolation: isolate;
     padding: 80px 0 100px;
     min-height: 88vh;
+    min-height: 88svh;
     display: flex;
     align-items: center;
     background: var(--color-bg-deep);
@@ -1756,4 +1763,215 @@ body.lang-ar .persona-voice {
 .persona-card h3 {
     /* Tighten margin since the voice now sits above */
     margin: 0 24px 10px;
+}
+
+/* =========================================================================
+   Hero device mockups (phone screenshots) — desktop-only, locale-aware via
+   data-screenshot swap. Tucked to the right (or left in RTL via logical
+   property), partially clipped, with low opacity so they read as backdrop
+   hint rather than competing with the centered hero copy.
+   ========================================================================= */
+.hero-device {
+    display: none;
+    position: absolute;
+    inset-block: 50%;
+    inset-inline-end: -140px;
+    transform: translateY(-50%);
+    width: 480px;
+    height: 600px;
+    z-index: 0;
+    pointer-events: none;
+}
+.hero-device__frame {
+    position: absolute;
+    width: 260px;
+    height: 520px;
+    border-radius: 44px;
+    overflow: hidden;
+    background: #fff;
+    border: 8px solid #fff;
+    box-shadow:
+        0 20px 50px -16px rgba(101, 66, 173, 0.3),
+        0 0 0 1px rgba(101, 66, 173, 0.1);
+}
+.hero-device__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.hero-device__frame--front {
+    inset-inline-end: 60px;
+    top: 0;
+    transform: rotate(6deg);
+    z-index: 2;
+    opacity: 0.95;
+}
+.hero-device__frame--rear {
+    inset-inline-end: 200px;
+    top: 36px;
+    transform: rotate(-5deg) scale(0.92);
+    z-index: 1;
+    opacity: 0.55;
+}
+body[dir="rtl"] .hero-device__frame--front { transform: rotate(-6deg); }
+body[dir="rtl"] .hero-device__frame--rear { transform: rotate(5deg) scale(0.92); }
+
+@media (min-width: 1100px) {
+    .hero-device { display: block; }
+}
+
+/* =========================================================================
+   "How a match feels" demo — card stack + side copy.
+   Locale-aware: card photos swap via data-marketing (same mechanism as
+   the personas section).
+   ========================================================================= */
+.demo {
+    padding: var(--section-padding);
+    background: var(--color-cream);
+}
+.demo .section-title { text-align: center; }
+.demo .section-subtitle { text-align: center; max-width: 640px; margin: 0 auto 56px; }
+.demo-split {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.demo-stage {
+    position: relative;
+    width: 320px;
+    height: 480px;
+    user-select: none;
+    margin: 0 auto;
+}
+.card-stack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+.card-stack-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+        0 24px 50px -20px rgba(101, 66, 173, 0.35),
+        0 0 0 1px rgba(101, 66, 173, 0.08);
+    transition: transform var(--transition), opacity var(--transition);
+    cursor: grab;
+    will-change: transform;
+}
+.card-stack-card:active { cursor: grabbing; }
+.card-stack-card[data-card="0"] { transform: translateY(0) scale(1); z-index: 3; }
+.card-stack-card[data-card="1"] { transform: translateY(12px) scale(0.96); z-index: 2; opacity: 0.88; }
+.card-stack-card[data-card="2"] { transform: translateY(24px) scale(0.92); z-index: 1; opacity: 0.7; }
+.card-stack-card.is-leaving-right {
+    transform: translateX(140%) rotate(20deg) !important;
+    opacity: 0 !important;
+    transition: transform 500ms ease-out, opacity 500ms;
+}
+.card-stack-card.is-leaving-left {
+    transform: translateX(-140%) rotate(-20deg) !important;
+    opacity: 0 !important;
+    transition: transform 500ms ease-out, opacity 500ms;
+}
+.card-stack-photo {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.card-stack-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+}
+.card-stack-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    color: #fff;
+    background: linear-gradient(180deg, transparent 0%, rgba(15, 15, 30, 0.85) 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.card-stack-caption strong {
+    font-family: var(--font-family-ar);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+body.lang-en .card-stack-caption strong {
+    font-family: 'Playfair Display', 'Inter', serif;
+    font-weight: 500;
+}
+.card-stack-caption span { font-size: 0.9rem; opacity: 0.85; }
+
+.card-stack-controls {
+    position: absolute;
+    bottom: -70px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+}
+.card-stack-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid rgba(101, 66, 173, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px -6px rgba(101, 66, 173, 0.25);
+    transition: transform var(--transition), background-color var(--transition);
+}
+.card-stack-btn:hover { transform: scale(1.06); }
+.card-stack-btn--pass { color: var(--color-text-secondary); }
+.card-stack-btn--like { color: var(--color-secondary); }
+.card-stack-btn--like:hover { background: var(--color-secondary); color: #fff; }
+
+.demo-copy ul.demo-beats {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.demo-beats li {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-inline-start: 18px;
+    border-inline-start: 2px solid var(--color-primary);
+}
+.demo-beats strong {
+    font-family: var(--font-family-ar);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+body.lang-en .demo-beats strong {
+    font-family: 'Playfair Display', 'Inter', serif;
+    font-weight: 500;
+}
+.demo-beats span { color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.6; }
+
+@media (max-width: 900px) {
+    .demo-split {
+        grid-template-columns: 1fr;
+        gap: 100px;  /* room for the bottom controls */
+    }
+}
+@media (max-width: 540px) {
+    .demo-stage { width: 280px; height: 420px; }
 }

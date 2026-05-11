@@ -22,6 +22,7 @@
             nav_features: 'المميزات',
             nav_how: 'كيف يعمل',
             nav_who: 'لمن جانرك',
+            nav_demo: 'جرّبه',
             nav_cities: 'المدن',
             nav_screenshots: 'صور التطبيق',
             nav_faq: 'الأسئلة الشائعة',
@@ -63,6 +64,21 @@
             feat_pill_profession: 'المهنة',
             feat_pill_location: 'الموقع',
             how_eyebrow: 'كيف يعمل',
+            demo_eyebrow: 'جرّب الإيقاع',
+            demo_title: 'كيف يبدو التطابق',
+            demo_subtitle: 'فيد جانرك الحقيقي مُصفّى وموثّق ومُختار. هذه لقطة فقط — اسحب البطاقة أو استخدم الأزرار.',
+            demo_card1_name: 'ليلى',
+            demo_card1_detail: '٢٨ · القاهرة · موثّقة',
+            demo_card2_name: 'يوسف',
+            demo_card2_detail: '٣٢ · دبي · موثّق',
+            demo_card3_name: 'سامي',
+            demo_card3_detail: '٣٥ · عمّان · موثّق',
+            demo_beat1_t: 'يمين يعني نعم.',
+            demo_beat1_b: 'إعجاب متبادل يفتح المحادثة — كما تتوقع، بدون مفاجآت.',
+            demo_beat2_t: 'فلاتر تعني ما تقول.',
+            demo_beat2_b: 'الجنسية، الديانة، اللغة — لن ترى من لا يطابق ما يهمك.',
+            demo_beat3_t: 'احترام من الكلمة الأولى.',
+            demo_beat3_b: 'جميع الأعضاء يجتازون التحقق ويوافقون على معايير المجتمع قبل الرسالة الأولى.',
             cities_eyebrow: 'جانرك حول العالم',
             cities_title: 'حيث يلتقي العالم العربي',
             cities_subtitle: 'مجتمع نشط في الوطن العربي والمهجر — الناس الذين يفهمونك ليسوا بعيدين.',
@@ -167,6 +183,7 @@
             nav_features: 'Features',
             nav_how: 'How It Works',
             nav_who: "Who it's for",
+            nav_demo: 'Try it',
             nav_cities: 'Cities',
             nav_screenshots: 'Screenshots',
             nav_faq: 'FAQ',
@@ -208,6 +225,21 @@
             feat_pill_profession: 'Profession',
             feat_pill_location: 'Location',
             how_eyebrow: 'How it works',
+            demo_eyebrow: 'Try the rhythm',
+            demo_title: 'How a match feels',
+            demo_subtitle: 'A real Janerek feed is filtered, verified, and curated. This is just a taste — drag a card or use the buttons.',
+            demo_card1_name: 'Layla',
+            demo_card1_detail: '28 · Cairo · Verified',
+            demo_card2_name: 'Yusuf',
+            demo_card2_detail: '32 · Dubai · Verified',
+            demo_card3_name: 'Sami',
+            demo_card3_detail: '35 · Amman · Verified',
+            demo_beat1_t: 'Right means yes.',
+            demo_beat1_b: 'Mutual likes open the chat — same as you\'d expect, no surprises.',
+            demo_beat2_t: 'Filters that mean it.',
+            demo_beat2_b: "Nationality, faith, language — you won't see profiles that don't match what counts.",
+            demo_beat3_t: 'Respect from message one.',
+            demo_beat3_b: 'Every member completes verification and agrees to community standards before they can write you.',
             cities_eyebrow: 'Janerek around the world',
             cities_title: 'An international community',
             cities_subtitle: "An active community across continents — the people who share your values are closer than you think.",
@@ -577,8 +609,19 @@
             rootMargin: '0px 0px -40px 0px'
         });
 
+        // Force-show elements already in viewport at init.
+        // The observer normally fires for them on next layout, but Safari
+        // iOS (especially RTL) can race on first paint — the URL bar
+        // animating in/out invalidates the intersection state and the
+        // observer skips the initial pass, leaving above-the-fold
+        // elements stuck at opacity 0 until the user scrolls.
         fadeElements.forEach(function (el) {
             observer.observe(el);
+            var rect = el.getBoundingClientRect();
+            var vh = window.innerHeight || document.documentElement.clientHeight;
+            if (rect.top < vh && rect.bottom > 0) {
+                el.classList.add('visible');
+            }
         });
     } else {
         fadeElements.forEach(function (el) {
@@ -732,6 +775,91 @@
             track('WebSignupClick', { locale: currentLang, location: el.closest('section')?.id || el.closest('.dialog') ? 'dialog' : 'unknown' });
         });
     });
+
+    // ——— Card-stack demo ———
+    // Lightweight pointer-driven swipe with Pass/Like buttons. Recycles
+    // cards to the end of the queue on dismiss so the demo loops.
+    (function () {
+        var stack = document.getElementById('cardStack');
+        if (!stack) return;
+        var cards = Array.prototype.slice.call(stack.querySelectorAll('.card-stack-card'));
+        var queue = cards.slice();
+        var dragging = null;
+        var startX = 0, startY = 0, dx = 0;
+        var tracked = false;
+
+        function applyZ() {
+            cards.forEach(function (c) {
+                var idx = queue.indexOf(c);
+                if (idx === -1) {
+                    c.style.display = 'none';
+                } else {
+                    c.style.display = '';
+                    c.dataset.card = String(idx);
+                    c.classList.remove('is-leaving-left', 'is-leaving-right');
+                    c.style.transform = '';
+                    c.style.opacity = '';
+                }
+            });
+        }
+        applyZ();
+
+        function fling(card, direction) {
+            card.classList.add(direction === 1 ? 'is-leaving-right' : 'is-leaving-left');
+            window.setTimeout(function () {
+                var i = queue.indexOf(card);
+                if (i !== -1) queue.splice(i, 1);
+                queue.push(card);
+                applyZ();
+            }, 500);
+            if (!tracked) {
+                tracked = true;
+                track('DemoCardInteract', { direction: direction === 1 ? 'like' : 'pass' });
+            }
+        }
+
+        function topCard() { return queue[0]; }
+
+        function onPointerDown(e) {
+            var top = topCard();
+            if (!top || !top.contains(e.target)) return;
+            dragging = top;
+            startX = e.clientX;
+            startY = e.clientY;
+            dx = 0;
+            top.style.transition = 'none';
+            if (top.setPointerCapture) top.setPointerCapture(e.pointerId);
+        }
+        function onPointerMove(e) {
+            if (!dragging) return;
+            dx = e.clientX - startX;
+            var dy = e.clientY - startY;
+            dragging.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) rotate(' + (dx / 20) + 'deg)';
+        }
+        function onPointerUp() {
+            if (!dragging) return;
+            var card = dragging;
+            dragging = null;
+            card.style.transition = '';
+            if (dx > 80) fling(card, 1);
+            else if (dx < -80) fling(card, -1);
+            else card.style.transform = '';
+            dx = 0;
+        }
+
+        stack.addEventListener('pointerdown', onPointerDown);
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+
+        document.querySelectorAll('.card-stack-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var top = topCard();
+                if (!top) return;
+                fling(top, btn.dataset.action === 'like' ? 1 : -1);
+            });
+        });
+    })();
 
     // ——— Newsletter form ———
     // Subscribes the visitor to monthly tips. Posts to /api/newsletter

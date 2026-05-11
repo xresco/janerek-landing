@@ -113,6 +113,7 @@
                 <li><a href="#personas" data-i18n="nav_who">لمن جانرك</a></li>
                 <li><a href="#features" data-i18n="nav_features">المميزات</a></li>
                 <li><a href="#how-it-works" data-i18n="nav_how">كيف يعمل</a></li>
+                <li><a href="#demo" data-i18n="nav_demo">جرّبه</a></li>
                 <li><a href="#cities" data-i18n="nav_cities">المدن</a></li>
                 <li><a href="#faq" data-i18n="nav_faq">الأسئلة الشائعة</a></li>
                 <li><a href="/signup/" class="nav-cta" data-i18n="nav_signup">سجّل الآن</a></li>
@@ -132,6 +133,19 @@
         <div class="hero-photo-bg" aria-hidden="true">
             <img src="/assets/images/marketing/hero-bg.jpg" alt="" width="2000" height="1333" fetchpriority="high">
         </div>
+
+        <!-- Decorative device mockups (desktop only) — phone screenshots
+             that signal "Janerek is an app." Locale-aware via data-screenshot
+             swap on language change. Hidden < 1100px. -->
+        <div class="hero-device" aria-hidden="true">
+            <div class="hero-device__frame hero-device__frame--front">
+                <img src="/assets/screenshots/ar/0.jpg" data-screenshot="0.jpg" alt="" width="1080" height="1920" loading="lazy">
+            </div>
+            <div class="hero-device__frame hero-device__frame--rear">
+                <img src="/assets/screenshots/ar/1.jpg" data-screenshot="1.jpg" alt="" width="1080" height="1920" loading="lazy">
+            </div>
+        </div>
+
         <div class="container hero-content">
             <div class="hero-icon fade-in">
                 <svg viewBox="0 0 465 465" width="100" height="100" aria-hidden="true">
@@ -350,6 +364,63 @@
                         <h3 data-i18n="step3_title">تواصل</h3>
                         <p data-i18n="step3_desc">عندما يكون الإعجاب متبادلاً، ابدأ المحادثة. خطط للقاء وتعرّف على شريكك المحتمل.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- "How a match feels" — interactive card-stack demo -->
+    <section class="demo" id="demo">
+        <div class="container demo-container">
+            <p class="eyebrow fade-in" data-i18n="demo_eyebrow">جرّب الإيقاع</p>
+            <h2 class="section-title fade-in" data-i18n="demo_title">كيف يبدو التطابق</h2>
+            <p class="section-subtitle fade-in" data-i18n="demo_subtitle">فيد جانرك الحقيقي مُصفّى وموثّق ومُختار. هذه لقطة فقط — اسحب البطاقة أو استخدم الأزرار.</p>
+            <div class="demo-split">
+                <div class="demo-stage" aria-label="Match preview">
+                    <div class="card-stack" id="cardStack">
+                        <div class="card-stack-card" data-card="0">
+                            <div class="card-stack-photo">
+                                <img src="/assets/images/marketing/ar/card-1.jpg" data-marketing="card-1.jpg" alt="" width="1100" height="1650" loading="lazy">
+                            </div>
+                            <div class="card-stack-caption">
+                                <strong data-i18n="demo_card1_name">ليلى</strong>
+                                <span data-i18n="demo_card1_detail">٢٨ · القاهرة · موثّقة</span>
+                            </div>
+                        </div>
+                        <div class="card-stack-card" data-card="1">
+                            <div class="card-stack-photo">
+                                <img src="/assets/images/marketing/ar/card-2.jpg" data-marketing="card-2.jpg" alt="" width="1100" height="1650" loading="lazy">
+                            </div>
+                            <div class="card-stack-caption">
+                                <strong data-i18n="demo_card2_name">يوسف</strong>
+                                <span data-i18n="demo_card2_detail">٣٢ · دبي · موثّق</span>
+                            </div>
+                        </div>
+                        <div class="card-stack-card" data-card="2">
+                            <div class="card-stack-photo">
+                                <img src="/assets/images/marketing/ar/card-3.jpg" data-marketing="card-3.jpg" alt="" width="1100" height="1650" loading="lazy">
+                            </div>
+                            <div class="card-stack-caption">
+                                <strong data-i18n="demo_card3_name">سامي</strong>
+                                <span data-i18n="demo_card3_detail">٣٥ · عمّان · موثّق</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-stack-controls">
+                        <button type="button" class="card-stack-btn card-stack-btn--pass" data-action="pass" aria-label="Pass">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+                        </button>
+                        <button type="button" class="card-stack-btn card-stack-btn--like" data-action="like" aria-label="Like">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.3-9.4C1.4 8.7 3.4 5 7 5c2 0 3.5 1 5 3 1.5-2 3-3 5-3 3.6 0 5.6 3.7 4.3 6.6C19 16.5 12 21 12 21z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="demo-copy fade-in">
+                    <ul class="demo-beats">
+                        <li><strong data-i18n="demo_beat1_t">يمين يعني نعم.</strong><span data-i18n="demo_beat1_b">إعجاب متبادل يفتح المحادثة — كما تتوقع، بدون مفاجآت.</span></li>
+                        <li><strong data-i18n="demo_beat2_t">فلاتر تعني ما تقول.</strong><span data-i18n="demo_beat2_b">الجنسية، الديانة، اللغة — لن ترى من لا يطابق ما يهمك.</span></li>
+                        <li><strong data-i18n="demo_beat3_t">احترام من الكلمة الأولى.</strong><span data-i18n="demo_beat3_b">جميع الأعضاء يجتازون التحقق ويوافقون على معايير المجتمع قبل الرسالة الأولى.</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
