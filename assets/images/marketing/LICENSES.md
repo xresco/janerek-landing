@@ -28,11 +28,11 @@ distinct from the persona images above.
 
 | File                  | Source                                                          |
 |-----------------------|-----------------------------------------------------------------|
-| `ar/card-1.jpg`       | https://www.pexels.com/photo/6475999/   (woman in hijab smiling, modern indoor)  |
+| `ar/card-1.jpg`       | https://www.pexels.com/photo/5893370/   (young woman in red hijab with eyeglasses) |
 | `ar/card-2.jpg`       | https://www.pexels.com/photo/13108255/  (Middle Eastern man, thoughtful)         |
 | `ar/card-3.jpg`       | https://www.pexels.com/photo/5071528/   (young man, casual close-up)             |
 | `en/card-1.jpg`       | https://www.pexels.com/photo/29123197/  (young woman indoors, soft warm light)   |
-| `en/card-2.jpg`       | https://www.pexels.com/photo/19797864/  (man with blue eyes, outdoor portrait)   |
+| `en/card-2.jpg`       | https://www.pexels.com/photo/33716146/  (contemplative young man, white shirt, hand on chin) |
 | `en/card-3.jpg`       | https://www.pexels.com/photo/9629932/   (confident young Black man, outdoor)     |
 
 Photos were downscaled with `sips` (`-Z 1100 -s formatOptions 72`) for
