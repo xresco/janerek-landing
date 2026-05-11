@@ -8,3 +8,27 @@
 # this is a backstop in case a future renderer omits it).
 /user/*/img/*
   Cache-Control: public, max-age=86400, s-maxage=604800
+
+# Static assets — long cache, immutable
+/assets/*
+  Cache-Control: public, max-age=2592000, immutable
+
+/css/*
+  Cache-Control: public, max-age=2592000, immutable
+
+/js/*
+  Cache-Control: public, max-age=2592000, immutable
+
+# Sitemap — short cache so updates propagate
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+# API endpoints — never cache
+/api/*
+  Cache-Control: no-store
+
+# Security headers globally
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()

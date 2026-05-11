@@ -1,2 +1,10 @@
 User-agent: *
+Allow: /
 Disallow: /p/
+Disallow: /api/
+Disallow: /functions/
+Disallow: /signup/
+Disallow: /onboarding/
+Disallow: /auth/
+
+Sitemap: https://janerek.com/sitemap.xml
