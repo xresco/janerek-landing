@@ -1885,6 +1885,20 @@ body[dir="rtl"] .hero-device__frame--rear { transform: rotate(5deg) scale(0.92);
 .card-stack-card[data-card="0"] { transform: translateY(0) scale(1); z-index: 3; }
 .card-stack-card[data-card="1"] { transform: translateY(12px) scale(0.96); z-index: 2; opacity: 0.88; }
 .card-stack-card[data-card="2"] { transform: translateY(24px) scale(0.92); z-index: 1; opacity: 0.7; }
+/* Deeper queue (4th+ card) sits hidden behind the visible top 3.
+   Promoted into view by the swipe-recycle JS as cards above it leave. */
+.card-stack-card[data-card="3"],
+.card-stack-card[data-card="4"],
+.card-stack-card[data-card="5"],
+.card-stack-card[data-card="6"],
+.card-stack-card[data-card="7"],
+.card-stack-card[data-card="8"],
+.card-stack-card[data-card="9"] {
+    transform: translateY(24px) scale(0.92);
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+}
 .card-stack-card.is-leaving-right {
     transform: translateX(140%) rotate(20deg) !important;
     opacity: 0 !important;
