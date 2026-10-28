@@ -43,7 +43,7 @@
     </div>
 
     <script type="module">
-        import { bootSignupPage, supabase, t, showAlert, hideAlert, setLoading } from "/js/signup-shared.js";
+        import { bootSignupPage, supabase, t, showAlert, hideAlert, setLoading, currentLang } from "/js/signup-shared.js";
 
         bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
 
@@ -71,10 +71,16 @@
                 // that lands on /auth/callback.html?code=…. shouldCreateUser
                 // is true by default, so first-time visitors get an account
                 // automatically when they click through.
+                // The language goes on the auth user so send-auth-email can
+                // write in it. Supabase only applies options.data when the
+                // user is created, so for a returning user this is the
+                // language they signed up in - which is the best signal
+                // available, and better than the English everyone got before.
                 const { error } = await sb.auth.signInWithOtp({
                     email,
                     options: {
                         emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+                        data: { lang: currentLang() },
                     },
                 });
                 if (error) {

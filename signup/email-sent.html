@@ -46,7 +46,7 @@
     </div>
 
     <script type="module">
-        import { bootSignupPage, supabase, t, showAlert, setLoading } from "/js/signup-shared.js";
+        import { bootSignupPage, supabase, t, showAlert, setLoading, currentLang } from "/js/signup-shared.js";
 
         bootSignupPage({ title: { ar: "جانرك — التسجيل", en: "Janerek — Sign up" } });
 
@@ -75,7 +75,10 @@
                 const sb = await supabase();
                 const { error } = await sb.auth.signInWithOtp({
                     email,
-                    options: { emailRedirectTo: `${window.location.origin}/auth/callback.html` },
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback.html`,
+                        data: { lang: currentLang() },
+                    },
                 });
                 if (error) {
                     showAlert(alertEl, "error", error.message);
